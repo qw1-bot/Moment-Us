@@ -2,10 +2,10 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-const RECORDS_KEY = "moment-us-records-v2";
-const TIMELINE_KEY = "moment-us-timeline-v2";
+const RECORDS_KEY = "moment-us-records-v3";
+const TIMELINE_KEY = "moment-us-timeline-v3";
 const INVITE_KEY = "moment-us-invite-code";
-const HOME_KEY = "moment-us-home-v2";
+const HOME_KEY = "moment-us-home-v3";
 
 const recordCategoryMap = {
   happy: {
@@ -50,29 +50,21 @@ function getDaysTogether(startDate) {
   const start = new Date(startDate);
   if (Number.isNaN(start.getTime())) return 0;
   const now = new Date();
-  const diff = now.setHours(0, 0, 0, 0) - start.setHours(0, 0, 0, 0);
+  const diff =
+    now.setHours(0, 0, 0, 0) - start.setHours(0, 0, 0, 0);
   return Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)) + 1);
 }
 
-function getDaysToAnniversary(anniversaryDate) {
-  if (!anniversaryDate) return null;
+function getDaysToDate(targetDate) {
+  if (!targetDate) return null;
   const today = new Date();
-  const target = new Date(anniversaryDate);
-
+  const target = new Date(targetDate);
   if (Number.isNaN(target.getTime())) return null;
 
-  const currentYearTarget = new Date(
-    today.getFullYear(),
-    target.getMonth(),
-    target.getDate()
-  );
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const end = new Date(target.getFullYear(), target.getMonth(), target.getDate());
 
-  let next = currentYearTarget;
-  if (next.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
-    next = new Date(today.getFullYear() + 1, target.getMonth(), target.getDate());
-  }
-
-  const diff = next.setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0);
+  const diff = end - start;
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
@@ -229,17 +221,12 @@ function PairPage({
   );
 }
 
-function HomePage({
-  homeData,
-  setHomeData,
-  onGoPair,
-}) {
+function HomePage({ homeData, setHomeData, onGoPair }) {
   const [editing, setEditing] = useState(false);
   const fileInputRef = useRef(null);
 
   const daysTogether = getDaysTogether(homeData.togetherDate);
-  const daysToAnniversary = getDaysToAnniversary(homeData.anniversaryDate);
-
+  const countdownDays = getDaysToDate(homeData.countdownDate);
   const previewWishes = homeData.wishes.filter(Boolean).slice(0, 2);
 
   const handleUploadImage = (e) => {
@@ -332,14 +319,29 @@ function HomePage({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-[#7B6A75]">纪念日日期</label>
+              <label className="text-sm text-[#7B6A75]">倒计时标题</label>
               <input
-                type="date"
-                value={formatDateInput(homeData.anniversaryDate)}
+                value={homeData.countdownTitle}
                 onChange={(e) =>
                   setHomeData((prev) => ({
                     ...prev,
-                    anniversaryDate: e.target.value,
+                    countdownTitle: e.target.value,
+                  }))
+                }
+                placeholder="例如：下一次见面"
+                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-[#7B6A75]">倒计时日期</label>
+              <input
+                type="date"
+                value={formatDateInput(homeData.countdownDate)}
+                onChange={(e) =>
+                  setHomeData((prev) => ({
+                    ...prev,
+                    countdownDate: e.target.value,
                   }))
                 }
                 className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
@@ -362,7 +364,7 @@ function HomePage({
                       .filter(Boolean),
                   }))
                 }
-                placeholder="一起去看海&#10;一起做一顿饭"
+                placeholder={"一起去看海\n一起做一顿饭"}
                 className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none resize-none text-[15px] leading-7 text-[#5F514E]"
               />
             </div>
@@ -372,13 +374,22 @@ function HomePage({
         <div className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFF1F4] text-xl">
-              📅
+              ⏳
             </div>
             <div>
-              <p className="text-sm text-[#8B7A84]">距离下一次纪念日还有</p>
-              <h2 className="text-2xl font-semibold text-[#5E4B56]">
-                {daysToAnniversary ?? 0} 天
-              </h2>
+              <p className="text-sm text-[#8B7A84]">下一次期待</p>
+              <h3 className="text-base font-semibold text-[#5E4B56] mt-1">
+                {homeData.countdownTitle || "下一次见面"}
+              </h3>
+              <p className="mt-1 text-sm text-[#8B7A84]">
+                {countdownDays === null
+                  ? "先设置一个日期吧"
+                  : countdownDays > 0
+                  ? `还有 ${countdownDays} 天`
+                  : countdownDays === 0
+                  ? "就是今天"
+                  : `已经过去 ${Math.abs(countdownDays)} 天`}
+              </p>
             </div>
           </div>
         </div>
@@ -531,7 +542,7 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
         <div className="mb-5">
           <h2 className="text-2xl font-bold text-[#7D5A5A]">时间轴</h2>
           <p className="text-sm text-[#8B7470] mt-1">
-            把我们一起走过的地方和时刻，慢慢串起来。
+            把我们一路走来的重要时刻，慢慢串起来。
           </p>
         </div>
 
@@ -549,54 +560,104 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
           </div>
         </div>
 
-        <div className="relative pl-6">
-          <div className="absolute left-[11px] top-0 bottom-0 w-[2px] bg-[#F1D7DE]" />
-
-          <div className="space-y-6">
-            {timelineItems.length === 0 ? (
-              <div className="rounded-[28px] border border-[#F5D6DC] bg-white/85 p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#FFF1F4] text-3xl">
-                  📍
-                </div>
-                <h3 className="text-lg font-semibold text-[#5E4B56]">
-                  时间轴还是空的
-                </h3>
-                <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[#8B7A84]">
-                  去记下你们一起去过的地方，或者一个特别的日子吧。
-                </p>
-              </div>
-            ) : (
-              timelineItems.map((item) => (
-                <div key={item.id} className="relative">
-                  <div className="absolute -left-[20px] top-5 h-4 w-4 rounded-full border-4 border-[#FFFDF2] bg-[#EBA2B1]" />
-
-                  <article className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <div className="text-xs text-[#AA98A2]">{item.date}</div>
-                      <button
-                        onClick={() => onDelete(item.id)}
-                        className="text-xs text-[#B07D78]"
-                      >
-                        删除
-                      </button>
-                    </div>
-
-                    <div className="mb-2 inline-block rounded-full bg-[#FFF1F4] px-3 py-1 text-xs text-[#C97C8A]">
-                      {item.place}
-                    </div>
-
-                    <h3 className="text-base font-semibold text-[#5E4B56]">
-                      {item.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-[#7C6C76] whitespace-pre-wrap">
-                      {item.description}
-                    </p>
-                  </article>
-                </div>
-              ))
-            )}
+        {timelineItems.length === 0 ? (
+          <div className="rounded-[28px] border border-[#F5D6DC] bg-white/85 p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#FFF1F4] text-3xl">
+              📍
+            </div>
+            <h3 className="text-lg font-semibold text-[#5E4B56]">
+              时间轴还是空的
+            </h3>
+            <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[#8B7A84]">
+              去记下你们一起去过的地方，或者一个特别重要的日子吧。
+            </p>
           </div>
-        </div>
+        ) : (
+          <div className="relative py-4">
+            <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-[3px] bg-[#F2CAD2] rounded-full" />
+
+            <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 pointer-events-none">
+              <div className="relative h-full w-24">
+                {timelineItems.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`absolute w-24 h-24 border-t-[3px] border-[#F2CAD2] rounded-t-full ${
+                      index % 2 === 0
+                        ? "left-0"
+                        : "-left-24 scale-x-[-1]"
+                    }`}
+                    style={{ top: `${index * 208 + 16}px` }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              {timelineItems.map((item, index) => {
+                const isLeft = index % 2 === 0;
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`relative grid grid-cols-[1fr_40px_1fr] items-start ${
+                      isLeft ? "" : ""
+                    }`}
+                  >
+                    <div className={isLeft ? "pr-3" : ""}>
+                      {isLeft ? (
+                        <article className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
+                          <div className="mb-2 text-xs text-[#AA98A2]">{item.date}</div>
+                          <div className="mb-2 inline-block rounded-full bg-[#FFF1F4] px-3 py-1 text-xs text-[#C97C8A]">
+                            {item.place}
+                          </div>
+                          <h3 className="text-base font-semibold text-[#5E4B56]">
+                            {item.title}
+                          </h3>
+                          <p className="mt-2 text-sm leading-6 text-[#7C6C76] whitespace-pre-wrap">
+                            {item.description}
+                          </p>
+                          <button
+                            onClick={() => onDelete(item.id)}
+                            className="mt-3 text-xs text-[#B07D78]"
+                          >
+                            删除
+                          </button>
+                        </article>
+                      ) : null}
+                    </div>
+
+                    <div className="relative flex justify-center">
+                      <div className="mt-6 h-4 w-4 rounded-full border-4 border-[#FFFDF2] bg-[#EBA2B1] z-10" />
+                    </div>
+
+                    <div className={isLeft ? "" : "pl-3"}>
+                      {!isLeft ? (
+                        <article className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
+                          <div className="mb-2 text-xs text-[#AA98A2]">{item.date}</div>
+                          <div className="mb-2 inline-block rounded-full bg-[#FFF1F4] px-3 py-1 text-xs text-[#C97C8A]">
+                            {item.place}
+                          </div>
+                          <h3 className="text-base font-semibold text-[#5E4B56]">
+                            {item.title}
+                          </h3>
+                          <p className="mt-2 text-sm leading-6 text-[#7C6C76] whitespace-pre-wrap">
+                            {item.description}
+                          </p>
+                          <button
+                            onClick={() => onDelete(item.id)}
+                            className="mt-3 text-xs text-[#B07D78]"
+                          >
+                            删除
+                          </button>
+                        </article>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <JellyButton
@@ -805,7 +866,8 @@ export default function Page() {
 
   const [homeData, setHomeData] = useState({
     togetherDate: "2025-04-15",
-    anniversaryDate: "2025-04-15",
+    countdownTitle: "下一次见面",
+    countdownDate: "2026-03-20",
     coverImage: "",
     wishes: ["一起去看海", "一起做一顿饭"],
   });
@@ -818,22 +880,7 @@ export default function Page() {
 
     if (savedRecords) {
       try {
-        const parsed = JSON.parse(savedRecords);
-
-        const migrated = parsed.map((item) => {
-          if (item.type === "moved") {
-            return { ...item, type: "happy" };
-          }
-          if (item.type === "conflict") {
-            return { ...item, type: "sad" };
-          }
-          if (item.type === "daily") {
-            return { ...item, type: "happy" };
-          }
-          return item;
-        });
-
-        setRecords(migrated);
+        setRecords(JSON.parse(savedRecords));
       } catch (e) {
         console.error("Failed to parse records", e);
       }
@@ -851,7 +898,19 @@ export default function Page() {
 
     if (savedHome) {
       try {
-        setHomeData(JSON.parse(savedHome));
+        const parsedHome = JSON.parse(savedHome);
+        setHomeData((prev) => ({
+          ...prev,
+          ...parsedHome,
+          countdownTitle:
+            parsedHome.countdownTitle || parsedHome.anniversaryDate
+              ? parsedHome.countdownTitle || "下一次见面"
+              : prev.countdownTitle,
+          countdownDate:
+            parsedHome.countdownDate ||
+            parsedHome.anniversaryDate ||
+            prev.countdownDate,
+        }));
       } catch (e) {
         console.error("Failed to parse home data", e);
       }
