@@ -532,9 +532,239 @@ function RecordsPage({ records, filter, setFilter, onDelete, onAdd }) {
 }
 
 function TimelinePage({ timelineItems, onAdd, onDelete }) {
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+
+  const dragState = React.useRef({
+    startX: 0,
+    startY: 0,
+    originX: 0,
+    originY: 0,
+  });
+
+  const touchState = React.useRef({
+    mode: null, // "drag" | "pinch"
+    startX: 0,
+    startY: 0,
+    originX: 0,
+    originY: 0,
+    initialDistance: 0,
+    initialZoom: 1,
+    pinchCenterX: 0,
+    pinchCenterY: 0,
+    initialOffsetX: 0,
+    initialOffsetY: 0,
+  });
+
+  const viewportRef = React.useRef(null);
+
   const placesCount = new Set(
     timelineItems.map((item) => item.place.trim()).filter(Boolean)
   ).size;
+
+  const sortedItems = [...timelineItems].sort((a, b) => a.createdAt - b.createdAt);
+
+  const baseWidth = 390;
+  const centerX = 195;
+  const topPadding = 80;
+  const gapY = 230;
+  const curveAmp = 42;
+  const totalHeight = Math.max(420, topPadding + sortedItems.length * gapY + 120);
+
+  const points = sortedItems.map((item, index) => {
+    const y = topPadding + index * gapY;
+    const side = index % 2 === 0 ? "left" : "right";
+    const x = side === "left" ? centerX - curveAmp : centerX + curveAmp;
+    return { ...item, x, y, side };
+  });
+
+  const buildPath = () => {
+    if (points.length === 0) {
+      return `M ${centerX} 40 C ${centerX - 20} 120, ${centerX + 20} 220, ${centerX} 320`;
+    }
+
+    let d = `M ${centerX} 28 `;
+    d += `C ${centerX - 12} 45, ${points[0].x} 52, ${points[0].x} ${points[0].y} `;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const midY = (p1.y + p2.y) / 2;
+      d += `C ${p1.x} ${midY - 40}, ${p2.x} ${midY + 40}, ${p2.x} ${p2.y} `;
+    }
+
+    const last = points[points.length - 1];
+    d += `C ${last.x} ${last.y + 60}, ${centerX + 10} ${last.y + 90}, ${centerX} ${last.y + 120}`;
+    return d;
+  };
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+  const getTouchDistance = (touches) => {
+    const [t1, t2] = touches;
+    const dx = t2.clientX - t1.clientX;
+    const dy = t2.clientY - t1.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const getTouchCenter = (touches, rect) => {
+    const [t1, t2] = touches;
+    return {
+      x: ((t1.clientX + t2.clientX) / 2) - rect.left,
+      y: ((t1.clientY + t2.clientY) / 2) - rect.top,
+    };
+  };
+
+  const zoomIn = () => setZoom((z) => Math.min(2.2, +(z + 0.1).toFixed(2)));
+  const zoomOut = () => setZoom((z) => Math.max(0.6, +(z - 0.1).toFixed(2)));
+  const resetView = () => {
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e) => {
+    if (e.target.closest("button")) return;
+    setDragging(true);
+    dragState.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: offset.x,
+      originY: offset.y,
+    };
+  };
+
+  const handleMouseMove = (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - dragState.current.startX;
+    const dy = e.clientY - dragState.current.startY;
+    setOffset({
+      x: dragState.current.originX + dx,
+      y: dragState.current.originY + dy,
+    });
+  };
+
+  const handleMouseUp = () => setDragging(false);
+
+  const handleWheel = (e) => {
+    if (!viewportRef.current) return;
+    e.preventDefault();
+
+    const rect = viewportRef.current.getBoundingClientRect();
+    const cursorX = e.clientX - rect.left;
+    const cursorY = e.clientY - rect.top;
+
+    const zoomDelta = e.deltaY < 0 ? 0.1 : -0.1;
+    const nextZoom = clamp(+(zoom + zoomDelta).toFixed(2), 0.6, 2.2);
+    if (nextZoom === zoom) return;
+
+    const scaleRatio = nextZoom / zoom;
+    const newOffsetX = cursorX - (cursorX - offset.x) * scaleRatio;
+    const newOffsetY = cursorY - (cursorY - offset.y) * scaleRatio;
+
+    setZoom(nextZoom);
+    setOffset({ x: newOffsetX, y: newOffsetY });
+  };
+
+  const handleTouchStart = (e) => {
+    if (!viewportRef.current) return;
+
+    const rect = viewportRef.current.getBoundingClientRect();
+
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      touchState.current = {
+        ...touchState.current,
+        mode: "drag",
+        startX: t.clientX,
+        startY: t.clientY,
+        originX: offset.x,
+        originY: offset.y,
+      };
+    }
+
+    if (e.touches.length === 2) {
+      const center = getTouchCenter(e.touches, rect);
+      touchState.current = {
+        ...touchState.current,
+        mode: "pinch",
+        initialDistance: getTouchDistance(e.touches),
+        initialZoom: zoom,
+        pinchCenterX: center.x,
+        pinchCenterY: center.y,
+        initialOffsetX: offset.x,
+        initialOffsetY: offset.y,
+      };
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!viewportRef.current) return;
+
+    if (touchState.current.mode === "drag" && e.touches.length === 1) {
+      const t = e.touches[0];
+      const dx = t.clientX - touchState.current.startX;
+      const dy = t.clientY - touchState.current.startY;
+      setOffset({
+        x: touchState.current.originX + dx,
+        y: touchState.current.originY + dy,
+      });
+      return;
+    }
+
+    if (touchState.current.mode === "pinch" && e.touches.length === 2) {
+      e.preventDefault();
+
+      const currentDistance = getTouchDistance(e.touches);
+      const nextZoom = clamp(
+        +(
+          touchState.current.initialZoom *
+          (currentDistance / touchState.current.initialDistance)
+        ).toFixed(2),
+        0.6,
+        2.2
+      );
+
+      const scaleRatio = nextZoom / touchState.current.initialZoom;
+
+      const newOffsetX =
+        touchState.current.pinchCenterX -
+        (touchState.current.pinchCenterX - touchState.current.initialOffsetX) *
+          scaleRatio;
+
+      const newOffsetY =
+        touchState.current.pinchCenterY -
+        (touchState.current.pinchCenterY - touchState.current.initialOffsetY) *
+          scaleRatio;
+
+      setZoom(nextZoom);
+      setOffset({ x: newOffsetX, y: newOffsetY });
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (e.touches.length === 0) {
+      touchState.current.mode = null;
+      return;
+    }
+
+    if (e.touches.length === 1 && viewportRef.current) {
+      const t = e.touches[0];
+      touchState.current = {
+        ...touchState.current,
+        mode: "drag",
+        startX: t.clientX,
+        startY: t.clientY,
+        originX: offset.x,
+        originY: offset.y,
+      };
+    }
+  };
+
+  React.useEffect(() => {
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => window.removeEventListener("mouseup", handleMouseUp);
+  });
 
   return (
     <div className="min-h-screen bg-cheese px-5 pt-6 pb-28 relative">
@@ -547,20 +777,43 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
         </div>
 
         <div className="mb-5 rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFF1F4] text-xl">
-              🗺️
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFF1F4] text-xl">
+                🗺️
+              </div>
+              <div>
+                <p className="text-sm text-[#8B7A84]">我们一起去过</p>
+                <h2 className="text-2xl font-semibold text-[#5E4B56]">
+                  {placesCount} 个地方
+                </h2>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-[#8B7A84]">我们一起去过</p>
-              <h2 className="text-2xl font-semibold text-[#5E4B56]">
-                {placesCount} 个地方
-              </h2>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={zoomOut}
+                className="h-9 w-9 rounded-full bg-[#FFF1F4] text-[#C97C8A] text-lg shadow-sm"
+              >
+                −
+              </button>
+              <button
+                onClick={resetView}
+                className="rounded-full bg-white border border-[#F3DADF] px-3 py-2 text-xs text-[#8B7A84] shadow-sm"
+              >
+                {Math.round(zoom * 100)}%
+              </button>
+              <button
+                onClick={zoomIn}
+                className="h-9 w-9 rounded-full bg-[#FFF1F4] text-[#C97C8A] text-lg shadow-sm"
+              >
+                +
+              </button>
             </div>
           </div>
         </div>
 
-        {timelineItems.length === 0 ? (
+        {sortedItems.length === 0 ? (
           <div className="rounded-[28px] border border-[#F5D6DC] bg-white/85 p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#FFF1F4] text-3xl">
               📍
@@ -573,88 +826,110 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
             </p>
           </div>
         ) : (
-          <div className="relative py-4">
-            <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-[3px] bg-[#F2CAD2] rounded-full" />
-
-            <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 pointer-events-none">
-              <div className="relative h-full w-24">
-                {timelineItems.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`absolute w-24 h-24 border-t-[3px] border-[#F2CAD2] rounded-t-full ${
-                      index % 2 === 0
-                        ? "left-0"
-                        : "-left-24 scale-x-[-1]"
-                    }`}
-                    style={{ top: `${index * 208 + 16}px` }}
-                  />
-                ))}
-              </div>
+          <div
+            ref={viewportRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onWheel={handleWheel}
+            onDoubleClick={resetView}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className={`rounded-[28px] border border-[#F7E3E7] bg-[#FFFDFC] shadow-[0_10px_24px_rgba(0,0,0,0.05)] overflow-hidden relative select-none touch-none ${
+              dragging ? "cursor-grabbing" : "cursor-grab"
+            }`}
+            style={{ height: "70vh" }}
+          >
+            <div className="absolute right-3 top-3 z-20 rounded-full bg-white/90 px-3 py-1 text-[11px] text-[#8B7A84] shadow-sm">
+              拖动查看 · 双指/滚轮缩放 · 双击重置
             </div>
 
-            <div className="space-y-8">
-              {timelineItems.map((item, index) => {
-                const isLeft = index % 2 === 0;
+            <div
+              className="absolute left-0 top-0 origin-top-left"
+              style={{
+                width: baseWidth,
+                height: totalHeight,
+                transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+                transformOrigin: "0 0",
+              }}
+            >
+              <svg
+                width={baseWidth}
+                height={totalHeight}
+                viewBox={`0 0 ${baseWidth} ${totalHeight}`}
+                className="absolute inset-0"
+              >
+                <defs>
+                  <linearGradient id="timelinePathGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#F5D3DB" />
+                    <stop offset="50%" stopColor="#EFB5C3" />
+                    <stop offset="100%" stopColor="#F5D3DB" />
+                  </linearGradient>
+                </defs>
 
-                return (
-                  <div
-                    key={item.id}
-                    className={`relative grid grid-cols-[1fr_40px_1fr] items-start ${
-                      isLeft ? "" : ""
-                    }`}
-                  >
-                    <div className={isLeft ? "pr-3" : ""}>
-                      {isLeft ? (
-                        <article className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-                          <div className="mb-2 text-xs text-[#AA98A2]">{item.date}</div>
-                          <div className="mb-2 inline-block rounded-full bg-[#FFF1F4] px-3 py-1 text-xs text-[#C97C8A]">
-                            {item.place}
-                          </div>
-                          <h3 className="text-base font-semibold text-[#5E4B56]">
-                            {item.title}
-                          </h3>
-                          <p className="mt-2 text-sm leading-6 text-[#7C6C76] whitespace-pre-wrap">
-                            {item.description}
-                          </p>
-                          <button
-                            onClick={() => onDelete(item.id)}
-                            className="mt-3 text-xs text-[#B07D78]"
-                          >
-                            删除
-                          </button>
-                        </article>
-                      ) : null}
-                    </div>
+                <path
+                  d={buildPath()}
+                  fill="none"
+                  stroke="url(#timelinePathGradient)"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
 
-                    <div className="relative flex justify-center">
-                      <div className="mt-6 h-4 w-4 rounded-full border-4 border-[#FFFDF2] bg-[#EBA2B1] z-10" />
-                    </div>
+                {points.map((point, index) => (
+                  <g key={`dot-${point.id}`}>
+                    <circle cx={point.x} cy={point.y} r="12" fill="#FFFDF2" />
+                    <circle
+                      cx={point.x}
+                      cy={point.y}
+                      r="7"
+                      fill={index % 2 === 0 ? "#EBA2B1" : "#DAB7FF"}
+                    />
+                  </g>
+                ))}
+              </svg>
 
-                    <div className={isLeft ? "" : "pl-3"}>
-                      {!isLeft ? (
-                        <article className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-                          <div className="mb-2 text-xs text-[#AA98A2]">{item.date}</div>
-                          <div className="mb-2 inline-block rounded-full bg-[#FFF1F4] px-3 py-1 text-xs text-[#C97C8A]">
-                            {item.place}
-                          </div>
-                          <h3 className="text-base font-semibold text-[#5E4B56]">
-                            {item.title}
-                          </h3>
-                          <p className="mt-2 text-sm leading-6 text-[#7C6C76] whitespace-pre-wrap">
-                            {item.description}
-                          </p>
-                          <button
-                            onClick={() => onDelete(item.id)}
-                            className="mt-3 text-xs text-[#B07D78]"
-                          >
-                            删除
-                          </button>
-                        </article>
-                      ) : null}
+              <div className="absolute inset-0">
+                {points.map((item) => {
+                  const isLeft = item.side === "left";
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="absolute"
+                      style={{
+                        top: item.y - 34,
+                        left: isLeft ? 16 : 218,
+                        width: 156,
+                      }}
+                    >
+                      <article className="rounded-[24px] border border-[#F7E3E7] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
+                        <div className="mb-2 text-xs text-[#AA98A2]">
+                          {item.date}
+                        </div>
+
+                        <div className="mb-2 inline-block rounded-full bg-[#FFF1F4] px-3 py-1 text-xs text-[#C97C8A]">
+                          {item.place}
+                        </div>
+
+                        <h3 className="text-sm font-semibold text-[#5E4B56] leading-6">
+                          {item.title}
+                        </h3>
+
+                        <p className="mt-2 text-xs leading-6 text-[#7C6C76] whitespace-pre-wrap">
+                          {item.description}
+                        </p>
+
+                        <button
+                          onClick={() => onDelete(item.id)}
+                          className="mt-3 text-xs text-[#B07D78]"
+                        >
+                          删除
+                        </button>
+                      </article>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
