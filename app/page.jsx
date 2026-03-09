@@ -419,43 +419,63 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
           </div>
         ) : null}
 
-        <div className="rounded-[24px] border border-[#F7E3E7] bg-white px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-          <h3 className="text-[15px] font-semibold text-[#5E4B56]">
-            爱的沙漏⏳
-          </h3>
+    <div className="relative overflow-hidden rounded-[26px] border border-[#F7E3E7] bg-[#FFF8FA] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.05)]">
+  <div
+    className="pointer-events-none absolute inset-0 opacity-40"
+    style={{
+      backgroundImage:
+        "radial-gradient(circle at 12px 12px, rgba(235,162,177,0.18) 1.2px, transparent 1.2px)",
+      backgroundSize: "22px 22px",
+    }}
+  />
 
-          <div className="mt-3 space-y-1">
-            {countdownItems.length === 0 ? (
-              <p className="py-2 text-[13px] text-[#8B7A84]">
-                还没有设置倒计时
-              </p>
-            ) : (
-              countdownItems.map((item, index) => {
-                const days = getDaysToDate(item.date);
+  <div className="relative flex items-start justify-between gap-3">
+    <div>
+      <h3 className="text-[15px] font-semibold text-[#5E4B56]">
+        爱的沙漏⏳
+      </h3>
+      <p className="mt-1 text-[12px] text-[#9C8A93]">
+        把想见面的日子，一点点数给未来
+      </p>
+    </div>
 
-                return (
-                  <div
-                    key={`${item.title}-${index}`}
-                    className="flex items-center justify-between gap-4 py-2"
-                  >
-                    <span className="text-[14px] text-[#5E4B56]">
-                      {item.title || `倒计时 ${index + 1}`}
-                    </span>
-                    <span className="text-[13px] text-[#8B7A84] whitespace-nowrap">
-                      {days === null
-                        ? "未设置日期"
-                        : days > 0
-                        ? `还有 ${days} 天`
-                        : days === 0
-                        ? "就是今天"
-                        : `已过去 ${Math.abs(days)} 天`}
-                    </span>
-                  </div>
-                );
-              })
-            )}
+    <div className="rounded-full bg-[#FFDCE6] px-2.5 py-1 text-[12px] text-[#D97A8C] shadow-sm">
+      🎀
+    </div>
+  </div>
+
+  <div className="relative mt-4 space-y-3">
+    {countdownItems.length === 0 ? (
+      <div className="rounded-2xl bg-white/75 px-4 py-3 text-[13px] text-[#8B7A84]">
+        还没有设置倒计时
+      </div>
+    ) : (
+      countdownItems.map((item, index) => {
+        const days = getDaysToDate(item.date);
+
+        return (
+          <div
+            key={`${item.title}-${index}`}
+            className="flex items-center justify-between gap-4 rounded-2xl bg-white/75 px-4 py-3"
+          >
+            <span className="text-[14px] text-[#5E4B56]">
+              {item.title || `倒计时 ${index + 1}`}
+            </span>
+            <span className="text-[13px] text-[#8B7A84] whitespace-nowrap">
+              {days === null
+                ? "未设置日期"
+                : days > 0
+                ? `还有 ${days} 天`
+                : days === 0
+                ? "就是今天"
+                : `已过去 ${Math.abs(days)} 天`}
+            </span>
           </div>
-        </div>
+        );
+      })
+    )}
+  </div>
+</div>
 
         <div className="rounded-[24px] border border-[#F7E3E7] bg-white px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
           <h3 className="text-[15px] font-semibold text-[#5E4B56]">
