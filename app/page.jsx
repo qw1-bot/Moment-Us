@@ -9,18 +9,46 @@ const HOME_KEY = "moment-us-home-v3";
 
 const recordCategoryMap = {
   happy: {
-    label: "幸福",
-    icon: "💗",
+    label: "开心",
+    icon: "😄",
+    bg: "bg-[#FFF6E8]",
+    text: "text-[#D28A2E]",
+  },
+  touched: {
+    label: "感动",
+    icon: "🥹",
     bg: "bg-[#FFF1F4]",
-    border: "border-[#F7D6DE]",
     text: "text-[#C97C8A]",
+  },
+  miss: {
+    label: "想念",
+    icon: "💭",
+    bg: "bg-[#F7F0FF]",
+    text: "text-[#9B78C8]",
+  },
+  calm: {
+    label: "平和",
+    icon: "🌿",
+    bg: "bg-[#EEF8F1]",
+    text: "text-[#5E9B72]",
   },
   sad: {
     label: "难过",
-    icon: "☁️",
+    icon: "😔",
     bg: "bg-[#F4F1FF]",
-    border: "border-[#DDD5FF]",
     text: "text-[#8B79C9]",
+  },
+  disappointed: {
+    label: "失望",
+    icon: "🥀",
+    bg: "bg-[#F7F3F0]",
+    text: "text-[#9A7E74]",
+  },
+  angry: {
+    label: "生气",
+    icon: "😤",
+    bg: "bg-[#FFF0F0]",
+    text: "text-[#D26A6A]",
   },
 };
 
@@ -71,13 +99,12 @@ function getDaysToDate(targetDate) {
 function BottomNav({ page, setPage }) {
   const items = [
     { key: "home", label: "首页", icon: "🏠" },
-    { key: "records", label: "记录", icon: "📖" },
-    { key: "timeline", label: "时间轴", icon: "🗺️" },
+    { key: "records", label: "记录", icon: "📝" },
   ];
 
   return (
     <nav className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-24px)] max-w-md -translate-x-1/2 rounded-full border border-[#F3DADF] bg-white/95 px-3 py-2 shadow-[0_12px_30px_rgba(0,0,0,0.10)] backdrop-blur">
-      <div className="grid grid-cols-3 items-center">
+      <div className="grid grid-cols-2 items-center">
         {items.map((item) => {
           const active = page === item.key;
           return (
@@ -436,50 +463,55 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
 function RecordsPage({ records, filter, setFilter, onDelete, onAdd }) {
   const filterTabs = [
     { key: "all", label: "全部" },
-    { key: "happy", label: "幸福" },
+    { key: "happy", label: "开心" },
+    { key: "touched", label: "感动" },
+    { key: "miss", label: "想念" },
+    { key: "calm", label: "平和" },
     { key: "sad", label: "难过" },
+    { key: "disappointed", label: "失望" },
+    { key: "angry", label: "生气" },
   ];
 
   return (
     <div className="min-h-screen bg-cheese px-5 pt-6 pb-28 relative">
       <div className="max-w-md mx-auto">
-        <div className="mb-5">
-          <h2 className="text-2xl font-bold text-[#7D5A5A]">记录</h2>
-          <p className="text-sm text-[#8B7470] mt-1">
-            把那些值得记住的瞬间，轻轻收好。
+        <div className="mb-4">
+          <h2 className="text-xl font-bold text-[#7D5A5A]">记录</h2>
+          <p className="text-[13px] text-[#8B7470] mt-1">
+            把那些值得留下来的情绪，轻轻写下来。
           </p>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-5">
-          {filterTabs.map((tab) => {
-            const active = filter === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setFilter(tab.key)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm shadow-sm border ${
-                  active
-                    ? "bg-primary text-white border-primary"
-                    : "bg-white text-[#7D5A5A] border-[#F3DADF]"
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+        <div className="mb-5 overflow-x-auto">
+          <div className="flex gap-2 pb-1 min-w-max">
+            {filterTabs.map((tab) => {
+              const active = filter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setFilter(tab.key)}
+                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition ${
+                    active
+                      ? "bg-primary text-white"
+                      : "bg-transparent text-[#8B7470]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           {records.length === 0 ? (
-            <div className="rounded-[28px] border border-[#F5D6DC] bg-white/85 p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#FFF1F4] text-3xl">
-                📖
-              </div>
-              <h3 className="text-lg font-semibold text-[#5E4B56]">
+            <div className="py-16 text-center">
+              <div className="text-3xl mb-3">📝</div>
+              <h3 className="text-base font-semibold text-[#5E4B56]">
                 这里还没有记录
               </h3>
-              <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[#8B7A84]">
-                去写下一个让你心软、开心，或者有点委屈的瞬间吧。
+              <p className="mx-auto mt-2 max-w-xs text-[13px] leading-6 text-[#8B7A84]">
+                写下今天的开心、难过，或者一个很安静的小瞬间吧。
               </p>
             </div>
           ) : (
@@ -488,30 +520,35 @@ function RecordsPage({ records, filter, setFilter, onDelete, onAdd }) {
               return (
                 <article
                   key={record.id}
-                  className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]"
+                  className="border-b border-[#F1E4E1] pb-5"
                 >
-                  <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
                     <span
-                      className={`rounded-full px-3 py-1 text-xs ${meta.bg} ${meta.text}`}
+                      className={`rounded-full px-2.5 py-1 text-[11px] ${meta.bg} ${meta.text}`}
                     >
                       {meta.icon} {meta.label}
                     </span>
 
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-[#AA98A2]">{record.date}</span>
+                      <span className="text-[11px] text-[#AA98A2]">
+                        {record.date}
+                      </span>
                       <button
                         onClick={() => onDelete(record.id)}
-                        className="text-xs text-[#B07D78]"
+                        className="text-[11px] text-[#B07D78]"
                       >
                         删除
                       </button>
                     </div>
                   </div>
 
-                  <h3 className="text-base font-semibold text-[#5E4B56]">
-                    {record.title || "没有标题的小瞬间"}
-                  </h3>
-                  <p className="mt-2 text-sm leading-7 text-[#7C6C76] whitespace-pre-wrap">
+                  {record.title ? (
+                    <h3 className="text-[15px] font-semibold text-[#5E4B56] leading-6">
+                      {record.title}
+                    </h3>
+                  ) : null}
+
+                  <p className="mt-1 text-[14px] leading-7 text-[#6B5B57] whitespace-pre-wrap">
                     {record.content}
                   </p>
                 </article>
@@ -950,18 +987,29 @@ function AddPage({ addMode, onSave, onBack }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const [timelineDate, setTimelineDate] = useState("");
-  const [timelinePlace, setTimelinePlace] = useState("");
+  const titleRef = useRef(null);
+  const contentRef = useRef(null);
 
-  const remaining = 200 - content.length;
+  const remaining = 300 - content.length;
 
   const recordOptions = [
-    { key: "happy", icon: "💗", label: "幸福" },
-    { key: "sad", icon: "☁️", label: "难过" },
+    { key: "happy", label: "开心", icon: "😄" },
+    { key: "touched", label: "感动", icon: "🥹" },
+    { key: "miss", label: "想念", icon: "💭" },
+    { key: "calm", label: "平和", icon: "🌿" },
+    { key: "sad", label: "难过", icon: "😔" },
+    { key: "disappointed", label: "失望", icon: "🥀" },
+    { key: "angry", label: "生气", icon: "😤" },
   ];
 
+  useEffect(() => {
+    if (addMode === "record" && titleRef.current) {
+      titleRef.current.focus();
+    }
+  }, [addMode]);
+
   const submitRecord = () => {
-    if (!content.trim()) return;
+    if (!title.trim() && !content.trim()) return;
 
     onSave({
       id: Date.now().toString(),
@@ -976,130 +1024,79 @@ function AddPage({ addMode, onSave, onBack }) {
     });
   };
 
-  const submitTimeline = () => {
-    if (!timelinePlace.trim()) return;
-
-    onSave({
-      id: Date.now().toString(),
-      date:
-        timelineDate ||
-        new Date().toLocaleDateString("zh-CN", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
-      place: timelinePlace.trim(),
-      createdAt: Date.now(),
-    });
+  const handleTitleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      contentRef.current?.focus();
+    }
   };
 
   return (
-    <div className="min-h-screen bg-cheese px-5 py-8">
-      <div className="max-w-md mx-auto space-y-5">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-cheese px-5 pt-6 pb-10">
+      <div className="max-w-md mx-auto">
+        <div className="mb-5 flex items-center justify-between">
           <button onClick={onBack} className="text-sm text-[#8B7470]">
             ← 返回
           </button>
-          <h2 className="text-xl font-bold text-[#7D5A5A]">
-            {addMode === "record" ? "添加记录" : "添加时间轴"}
-          </h2>
-          <div className="w-10" />
+
+          <div className="text-sm text-[#8B7470]">
+            {recordCategoryMap[recordType]?.label}
+          </div>
+
+          <button
+            onClick={submitRecord}
+            className="text-sm font-medium text-[#D97A8C]"
+          >
+            保存
+          </button>
         </div>
 
-        {addMode === "record" ? (
-          <>
-            <div className="grid grid-cols-2 gap-3">
-              {recordOptions.map((item) => {
-                const active = recordType === item.key;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => setRecordType(item.key)}
-                    className={`rounded-3xl px-3 py-4 shadow-md transition-all active:scale-95 ${
-                      active
-                        ? "bg-primary text-white"
-                        : "bg-white text-[#7D5A5A]"
-                    }`}
-                  >
-                    <div className="text-2xl mb-2">{item.icon}</div>
-                    <div className="text-sm font-medium">{item.label}</div>
-                  </button>
-                );
-              })}
-            </div>
+        <div className="mb-5 overflow-x-auto">
+          <div className="flex gap-2 pb-1 min-w-max">
+            {recordOptions.map((item) => {
+              const active = recordType === item.key;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => setRecordType(item.key)}
+                  className={`rounded-full px-3 py-1.5 text-[13px] transition ${
+                    active
+                      ? "bg-primary text-white"
+                      : "bg-transparent text-[#8B7470]"
+                  }`}
+                >
+                  {item.icon} {item.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
-              <div className="absolute -right-3 -top-3 rotate-12 rounded-full bg-[#FFD9A8] px-3 py-1 text-xs text-[#8C6A3C] shadow-sm">
-                today
-              </div>
-              <div className="absolute -left-3 top-14 -rotate-12 rounded-full bg-[#FAD1DC] px-3 py-1 text-xs text-[#B16478] shadow-sm">
-                sweet note
-              </div>
+        <div className="pt-2">
+          <input
+            ref={titleRef}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={handleTitleKeyDown}
+            placeholder="标题"
+            className="w-full bg-transparent text-[22px] font-semibold text-[#5E4B56] placeholder:text-[#B7A6A2] outline-none"
+          />
 
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="给这一刻起个小标题"
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-              />
+          <textarea
+            ref={contentRef}
+            value={content}
+            onChange={(e) => {
+              if (e.target.value.length <= 300) setContent(e.target.value);
+            }}
+            rows={12}
+            placeholder="写下这一刻的感受……"
+            className="mt-4 w-full resize-none bg-transparent outline-none text-[14px] leading-8 text-[#5F514E] placeholder:text-[#B7A6A2]"
+          />
 
-              <div className="rounded-3xl bg-[#FFFDFC] border border-[#F3DADF] p-4">
-                <textarea
-                  value={content}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 200) setContent(e.target.value);
-                  }}
-                  rows={7}
-                  placeholder="写下这一刻的幸福或难过"
-                  className="w-full resize-none bg-transparent outline-none text-[15px] leading-7 text-[#5F514E] placeholder:text-[#B7A6A2]"
-                />
-
-                <div className="text-right text-xs text-[#A2908D] mt-2">
-                  {remaining}/200
-                </div>
-              </div>
-            </div>
-
-            <JellyButton
-              onClick={submitRecord}
-              className="w-full bg-primary py-4 text-white font-semibold text-lg"
-            >
-              存下这一刻
-            </JellyButton>
-          </>
-        ) : (
-          <>
-            <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
-              <div className="absolute -right-3 -top-3 rotate-12 rounded-full bg-[#FFD9A8] px-3 py-1 text-xs text-[#8C6A3C] shadow-sm">
-                place
-              </div>
-              <div className="absolute -left-3 top-14 -rotate-12 rounded-full bg-[#FAD1DC] px-3 py-1 text-xs text-[#B16478] shadow-sm">
-                memory
-              </div>
-
-              <input
-                type="date"
-                value={timelineDate}
-                onChange={(e) => setTimelineDate(e.target.value)}
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-              />
-
-              <input
-                value={timelinePlace}
-                onChange={(e) => setTimelinePlace(e.target.value)}
-                placeholder="一起去过的地方"
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-              />
-            </div>
-
-            <JellyButton
-              onClick={submitTimeline}
-              className="w-full bg-primary py-4 text-white font-semibold text-lg"
-            >
-              存进时间轴
-            </JellyButton>
-          </>
-        )}
+          <div className="mt-4 text-right text-[11px] text-[#A2908D]">
+            {remaining}/300
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1303,17 +1300,6 @@ export default function Page() {
         />
       )}
 
-      {page === "timeline" && (
-        <TimelinePage
-          timelineItems={sortedTimeline}
-          onDelete={handleDeleteTimeline}
-          onAdd={() => {
-            setAddMode("timeline");
-            setReturnPage("timeline");
-            setPage("add");
-          }}
-        />
-      )}
 
       <BottomNav page={page} setPage={setPage} />
     </>
