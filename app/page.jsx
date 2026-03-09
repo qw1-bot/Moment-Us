@@ -138,7 +138,7 @@ function WelcomePage({ onStart, onInvite }) {
             <p className="text-base leading-7 text-[#6B5B57] px-2">
               一个只属于你们的空间，
               <br />
-              用来记录那些值得被记住的瞬间
+              用来记录那些值得被记住的瞬间✨💗
             </p>
           </div>
         </div>
