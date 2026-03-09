@@ -856,8 +856,18 @@ if (savedHome) {
 
 
   useEffect(() => {
+  try {
     localStorage.setItem(HOME_KEY, JSON.stringify(homeData));
-  }, [homeData]);
+  } catch (e) {
+    console.error("Failed to save home data", e);
+    alert("背景图片太大，保存失败。请换一张更小的图片。");
+
+    setHomeData((prev) => ({
+      ...prev,
+      coverImage: "",
+    }));
+  }
+}, [homeData]);
 
   const filteredRecords = useMemo(() => {
     const sorted = [...records].sort((a, b) => b.createdAt - a.createdAt);
