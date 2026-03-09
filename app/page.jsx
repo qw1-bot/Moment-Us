@@ -2,9 +2,9 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-const RECORDS_KEY = "moment-us-records-v3";
+const RECORDS_KEY = "moment-us-records-v4";
 const INVITE_KEY = "moment-us-invite-code";
-const HOME_KEY = "moment-us-home-v3";
+const HOME_KEY = "moment-us-home-v4";
 
 const recordCategoryMap = {
   happy: {
