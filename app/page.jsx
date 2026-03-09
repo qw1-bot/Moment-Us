@@ -497,7 +497,7 @@ const filterTabs = [
 
   return (
     <div className="min-h-screen bg-cheese px-5 pt-6 pb-28 relative">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-xl mx-auto">
         <div className="mb-4">
           <h2 className="text-xl font-bold text-[#7D5A5A]">记录</h2>
           <p className="text-[13px] text-[#8B7470] mt-1">
@@ -505,21 +505,22 @@ const filterTabs = [
           </p>
         </div>
 
-<div className="mb-5">
-  <div className="flex flex-wrap gap-2">
+<div className="mb-5 overflow-x-auto">
+  <div className="flex gap-2 pb-1 min-w-max">
     {filterTabs.map((tab) => {
       const active = filter === tab.key;
       return (
         <button
           key={tab.key}
           onClick={() => setFilter(tab.key)}
-          className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition ${
+          className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition inline-flex items-center gap-1.5 ${
             active
               ? "bg-primary text-white"
               : "bg-transparent text-[#8B7470]"
           }`}
         >
-          {tab.label}
+          <span>{tab.icon}</span>
+          <span>{tab.label}</span>
         </button>
       );
     })}
