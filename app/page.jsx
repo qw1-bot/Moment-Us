@@ -477,28 +477,48 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
   </div>
 </div>
 
-        <div className="rounded-[24px] border border-[#F7E3E7] bg-white px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-          <h3 className="text-[15px] font-semibold text-[#5E4B56]">
-            愿望清单💗
-          </h3>
+     <div className="relative overflow-hidden rounded-[26px] border border-[#F7E9D9] bg-[#FFFDF8] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.05)]">
+  <div
+    className="pointer-events-none absolute inset-0 opacity-35"
+    style={{
+      backgroundImage:
+        "radial-gradient(circle at 12px 12px, rgba(255,203,148,0.18) 1.2px, transparent 1.2px)",
+      backgroundSize: "22px 22px",
+    }}
+  />
 
-          <div className="mt-3 space-y-1">
-            {previewWishes.length === 0 ? (
-              <p className="py-2 text-[13px] text-[#8B7A84]">
-                还没有写下愿望
-              </p>
-            ) : (
-              previewWishes.map((wish, index) => (
-                <div
-                  key={`${wish}-${index}`}
-                  className="py-2 text-[14px] text-[#5E4B56]"
-                >
-                  {wish}
-                </div>
-              ))
-            )}
-          </div>
+  <div className="relative flex items-start justify-between gap-3">
+    <div>
+      <h3 className="text-[15px] font-semibold text-[#5E4B56]">
+        愿望清单💗
+      </h3>
+      <p className="mt-1 text-[12px] text-[#9C8A93]">
+        把想一起做的小事，悄悄存起来
+      </p>
+    </div>
+
+    <div className="rounded-full bg-[#FFDCE6] px-2.5 py-1 text-[12px] text-[#D97A8C] shadow-sm">
+      🎀
+    </div>
+  </div>
+
+  <div className="relative mt-4 space-y-3">
+    {previewWishes.length === 0 ? (
+      <div className="rounded-2xl bg-white/75 px-4 py-3 text-[13px] text-[#8B7A84]">
+        还没有写下愿望
+      </div>
+    ) : (
+      previewWishes.map((wish, index) => (
+        <div
+          key={`${wish}-${index}`}
+          className="rounded-2xl bg-white/75 px-4 py-3 text-[14px] text-[#5E4B56]"
+        >
+          {wish}
         </div>
+      ))
+    )}
+  </div>
+</div>
       </div>
     </div>
   );
