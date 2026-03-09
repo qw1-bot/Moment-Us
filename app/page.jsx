@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const RECORDS_KEY = "moment-us-records-v3";
-const TIMELINE_KEY = "moment-us-timeline-v3";
 const INVITE_KEY = "moment-us-invite-code";
 const HOME_KEY = "moment-us-home-v3";
 
@@ -253,8 +252,12 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
   const fileInputRef = useRef(null);
 
   const daysTogether = getDaysTogether(homeData.togetherDate);
-  const countdownDays = getDaysToDate(homeData.countdownDate);
-  const previewWishes = homeData.wishes.filter(Boolean).slice(0, 2);
+
+  const countdownItems = (homeData.countdowns || [])
+    .slice(0, 3)
+    .filter((item) => item.title || item.date);
+
+  const previewWishes = (homeData.wishes || []).slice(0, 3).filter(Boolean);
 
   const handleUploadImage = (e) => {
     const file = e.target.files?.[0];
@@ -268,6 +271,33 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
       }));
     };
     reader.readAsDataURL(file);
+  };
+
+  const updateCountdown = (index, field, value) => {
+    setHomeData((prev) => {
+      const next = [...(prev.countdowns || [])];
+      while (next.length < 3) next.push({ title: "", date: "" });
+      next[index] = {
+        ...next[index],
+        [field]: value,
+      };
+      return {
+        ...prev,
+        countdowns: next.slice(0, 3),
+      };
+    });
+  };
+
+  const updateWish = (index, value) => {
+    setHomeData((prev) => {
+      const next = [...(prev.wishes || [])];
+      while (next.length < 3) next.push("");
+      next[index] = value;
+      return {
+        ...prev,
+        wishes: next.slice(0, 3),
+      };
+    });
   };
 
   return (
@@ -316,8 +346,10 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
         </div>
 
         {editing ? (
-          <div className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] space-y-4">
-            <h3 className="text-lg font-semibold text-[#5E4B56]">编辑首页内容</h3>
+          <div className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] space-y-5">
+            <h3 className="text-[15px] font-semibold text-[#5E4B56]">
+              编辑首页内容
+            </h3>
 
             <div className="space-y-2">
               <label className="text-sm text-[#7B6A75]">上传首页背景照片</label>
@@ -345,121 +377,112 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-[#7B6A75]">倒计时标题</label>
-              <input
-                value={homeData.countdownTitle}
-                onChange={(e) =>
-                  setHomeData((prev) => ({
-                    ...prev,
-                    countdownTitle: e.target.value,
-                  }))
-                }
-                placeholder="例如：下一次见面"
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-              />
+            <div className="space-y-3">
+              <label className="text-sm text-[#7B6A75]">倒计时（最多 3 个）</label>
+
+              {[0, 1, 2].map((index) => (
+                <div key={index} className="grid grid-cols-1 gap-3">
+                  <input
+                    value={homeData.countdowns?.[index]?.title || ""}
+                    onChange={(e) =>
+                      updateCountdown(index, "title", e.target.value)
+                    }
+                    placeholder={`标题 ${index + 1}（例如：下一次见面）`}
+                    className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+                  />
+
+                  <input
+                    type="date"
+                    value={formatDateInput(homeData.countdowns?.[index]?.date)}
+                    onChange={(e) =>
+                      updateCountdown(index, "date", e.target.value)
+                    }
+                    className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+                  />
+                </div>
+              ))}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-[#7B6A75]">倒计时日期</label>
-              <input
-                type="date"
-                value={formatDateInput(homeData.countdownDate)}
-                onChange={(e) =>
-                  setHomeData((prev) => ({
-                    ...prev,
-                    countdownDate: e.target.value,
-                  }))
-                }
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-              />
-            </div>
+            <div className="space-y-3">
+              <label className="text-sm text-[#7B6A75]">愿望清单（最多 3 个）</label>
 
-            <div className="space-y-2">
-              <label className="text-sm text-[#7B6A75]">
-                愿望清单（每行写一条）
-              </label>
-              <textarea
-                rows={4}
-                value={homeData.wishes.join("\n")}
-                onChange={(e) =>
-                  setHomeData((prev) => ({
-                    ...prev,
-                    wishes: e.target.value
-                      .split("\n")
-                      .map((item) => item.trim())
-                      .filter(Boolean),
-                  }))
-                }
-                placeholder={"一起去意大利🇮🇹\n一起去看一场NBA"}
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none resize-none text-[15px] leading-7 text-[#5F514E]"
-              />
+              {[0, 1, 2].map((index) => (
+                <input
+                  key={index}
+                  value={homeData.wishes?.[index] || ""}
+                  onChange={(e) => updateWish(index, e.target.value)}
+                  placeholder={`愿望 ${index + 1}`}
+                  className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+                />
+              ))}
             </div>
           </div>
         ) : null}
 
-        <div className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFF1F4] text-xl">
-              ⏳
-            </div>
-            <div>
-              <p className="text-sm text-[#8B7A84]">倒计时</p>
-              <h3 className="text-base font-semibold text-[#5E4B56] mt-1">
-                {homeData.countdownTitle || "下一次见面"}
-              </h3>
-              <p className="mt-1 text-sm text-[#8B7A84]">
-                {countdownDays === null
-                  ? "先设置一个日期吧"
-                  : countdownDays > 0
-                  ? `还有 ${countdownDays} 天`
-                  : countdownDays === 0
-                  ? "就是今天"
-                  : `已经过去 ${Math.abs(countdownDays)} 天`}
+        <div className="rounded-[24px] border border-[#F7E3E7] bg-white px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
+          <h3 className="text-[15px] font-semibold text-[#5E4B56]">
+            倒计时
+          </h3>
+
+          <div className="mt-3 space-y-1">
+            {countdownItems.length === 0 ? (
+              <p className="py-2 text-[13px] text-[#8B7A84]">
+                还没有设置倒计时
               </p>
-            </div>
+            ) : (
+              countdownItems.map((item, index) => {
+                const days = getDaysToDate(item.date);
+
+                return (
+                  <div
+                    key={`${item.title}-${index}`}
+                    className="flex items-center justify-between gap-4 py-2"
+                  >
+                    <span className="text-[14px] text-[#5E4B56]">
+                      {item.title || `倒计时 ${index + 1}`}
+                    </span>
+                    <span className="text-[13px] text-[#8B7A84] whitespace-nowrap">
+                      {days === null
+                        ? "未设置日期"
+                        : days > 0
+                        ? `还有 ${days} 天`
+                        : days === 0
+                        ? "就是今天"
+                        : `已过去 ${Math.abs(days)} 天`}
+                    </span>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-[#5E4B56]">
-                愿望清单
-              </h3>
-              <p className="mt-1 text-sm text-[#8B7A84]">
-                把未来的小期待，也轻轻放进这里
-              </p>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF1F4] text-lg">
-              💞
-            </div>
-          </div>
+        <div className="rounded-[24px] border border-[#F7E3E7] bg-white px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
+          <h3 className="text-[15px] font-semibold text-[#5E4B56]">
+            愿望清单
+          </h3>
 
-          {previewWishes.length === 0 ? (
-            <div className="rounded-3xl bg-[#FFF8FA] px-4 py-5 text-sm text-[#8B7A84] text-center leading-6">
-              这里还没有愿望清单。
-              <br />
-              写下一件你们想一起完成的小事吧。
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {previewWishes.map((wish, index) => (
+          <div className="mt-3 space-y-1">
+            {previewWishes.length === 0 ? (
+              <p className="py-2 text-[13px] text-[#8B7A84]">
+                还没有写下愿望
+              </p>
+            ) : (
+              previewWishes.map((wish, index) => (
                 <div
                   key={`${wish}-${index}`}
-                  className="rounded-2xl bg-[#FFF8FA] px-4 py-3 text-sm text-[#6F5D67]"
+                  className="py-2 text-[14px] text-[#5E4B56]"
                 >
-                  ✨ {wish}
+                  {wish}
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
 function RecordsPage({ records, filter, setFilter, onDelete, onAdd }) {
   const filterTabs = [
     { key: "all", label: "全部" },
@@ -568,419 +591,6 @@ function RecordsPage({ records, filter, setFilter, onDelete, onAdd }) {
   );
 }
 
-function TimelinePage({ timelineItems, onAdd, onDelete }) {
-  const [zoom, setZoom] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-
-  const dragState = React.useRef({
-    startX: 0,
-    startY: 0,
-    originX: 0,
-    originY: 0,
-  });
-
-  const touchState = React.useRef({
-    mode: null, // "drag" | "pinch"
-    startX: 0,
-    startY: 0,
-    originX: 0,
-    originY: 0,
-    initialDistance: 0,
-    initialZoom: 1,
-    pinchCenterX: 0,
-    pinchCenterY: 0,
-    initialOffsetX: 0,
-    initialOffsetY: 0,
-  });
-
-  const viewportRef = React.useRef(null);
-
-  const placesCount = new Set(
-    timelineItems.map((item) => item.place.trim()).filter(Boolean)
-  ).size;
-
-  const sortedItems = [...timelineItems].sort((a, b) => a.createdAt - b.createdAt);
-
-  const baseWidth = 390;
-  const centerX = 195;
-  const topPadding = 80;
-  const gapY = 230;
-  const curveAmp = 42;
-  const totalHeight = Math.max(420, topPadding + sortedItems.length * gapY + 120);
-
-  const points = sortedItems.map((item, index) => {
-    const y = topPadding + index * gapY;
-    const side = index % 2 === 0 ? "left" : "right";
-    const x = side === "left" ? centerX - curveAmp : centerX + curveAmp;
-    return { ...item, x, y, side };
-  });
-
-  const buildPath = () => {
-    if (points.length === 0) {
-      return `M ${centerX} 40 C ${centerX - 20} 120, ${centerX + 20} 220, ${centerX} 320`;
-    }
-
-    let d = `M ${centerX} 28 `;
-    d += `C ${centerX - 12} 45, ${points[0].x} 52, ${points[0].x} ${points[0].y} `;
-
-    for (let i = 0; i < points.length - 1; i++) {
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const midY = (p1.y + p2.y) / 2;
-      d += `C ${p1.x} ${midY - 40}, ${p2.x} ${midY + 40}, ${p2.x} ${p2.y} `;
-    }
-
-    const last = points[points.length - 1];
-    d += `C ${last.x} ${last.y + 60}, ${centerX + 10} ${last.y + 90}, ${centerX} ${last.y + 120}`;
-    return d;
-  };
-
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-
-  const getTouchDistance = (touches) => {
-    const [t1, t2] = touches;
-    const dx = t2.clientX - t1.clientX;
-    const dy = t2.clientY - t1.clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  const getTouchCenter = (touches, rect) => {
-    const [t1, t2] = touches;
-    return {
-      x: ((t1.clientX + t2.clientX) / 2) - rect.left,
-      y: ((t1.clientY + t2.clientY) / 2) - rect.top,
-    };
-  };
-
-  const zoomIn = () => setZoom((z) => Math.min(2.2, +(z + 0.1).toFixed(2)));
-  const zoomOut = () => setZoom((z) => Math.max(0.6, +(z - 0.1).toFixed(2)));
-  const resetView = () => {
-    setZoom(1);
-    setOffset({ x: 0, y: 0 });
-  };
-
-  const handleMouseDown = (e) => {
-    if (e.target.closest("button")) return;
-    setDragging(true);
-    dragState.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      originX: offset.x,
-      originY: offset.y,
-    };
-  };
-
-  const handleMouseMove = (e) => {
-    if (!dragging) return;
-    const dx = e.clientX - dragState.current.startX;
-    const dy = e.clientY - dragState.current.startY;
-    setOffset({
-      x: dragState.current.originX + dx,
-      y: dragState.current.originY + dy,
-    });
-  };
-
-  const handleMouseUp = () => setDragging(false);
-
-  const handleWheel = (e) => {
-    if (!viewportRef.current) return;
-    e.preventDefault();
-
-    const rect = viewportRef.current.getBoundingClientRect();
-    const cursorX = e.clientX - rect.left;
-    const cursorY = e.clientY - rect.top;
-
-    const zoomDelta = e.deltaY < 0 ? 0.1 : -0.1;
-    const nextZoom = clamp(+(zoom + zoomDelta).toFixed(2), 0.6, 2.2);
-    if (nextZoom === zoom) return;
-
-    const scaleRatio = nextZoom / zoom;
-    const newOffsetX = cursorX - (cursorX - offset.x) * scaleRatio;
-    const newOffsetY = cursorY - (cursorY - offset.y) * scaleRatio;
-
-    setZoom(nextZoom);
-    setOffset({ x: newOffsetX, y: newOffsetY });
-  };
-
-  const handleTouchStart = (e) => {
-    if (!viewportRef.current) return;
-
-    const rect = viewportRef.current.getBoundingClientRect();
-
-    if (e.touches.length === 1) {
-      const t = e.touches[0];
-      touchState.current = {
-        ...touchState.current,
-        mode: "drag",
-        startX: t.clientX,
-        startY: t.clientY,
-        originX: offset.x,
-        originY: offset.y,
-      };
-    }
-
-    if (e.touches.length === 2) {
-      const center = getTouchCenter(e.touches, rect);
-      touchState.current = {
-        ...touchState.current,
-        mode: "pinch",
-        initialDistance: getTouchDistance(e.touches),
-        initialZoom: zoom,
-        pinchCenterX: center.x,
-        pinchCenterY: center.y,
-        initialOffsetX: offset.x,
-        initialOffsetY: offset.y,
-      };
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    if (!viewportRef.current) return;
-
-    if (touchState.current.mode === "drag" && e.touches.length === 1) {
-      const t = e.touches[0];
-      const dx = t.clientX - touchState.current.startX;
-      const dy = t.clientY - touchState.current.startY;
-      setOffset({
-        x: touchState.current.originX + dx,
-        y: touchState.current.originY + dy,
-      });
-      return;
-    }
-
-    if (touchState.current.mode === "pinch" && e.touches.length === 2) {
-      e.preventDefault();
-
-      const currentDistance = getTouchDistance(e.touches);
-      const nextZoom = clamp(
-        +(
-          touchState.current.initialZoom *
-          (currentDistance / touchState.current.initialDistance)
-        ).toFixed(2),
-        0.6,
-        2.2
-      );
-
-      const scaleRatio = nextZoom / touchState.current.initialZoom;
-
-      const newOffsetX =
-        touchState.current.pinchCenterX -
-        (touchState.current.pinchCenterX - touchState.current.initialOffsetX) *
-          scaleRatio;
-
-      const newOffsetY =
-        touchState.current.pinchCenterY -
-        (touchState.current.pinchCenterY - touchState.current.initialOffsetY) *
-          scaleRatio;
-
-      setZoom(nextZoom);
-      setOffset({ x: newOffsetX, y: newOffsetY });
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    if (e.touches.length === 0) {
-      touchState.current.mode = null;
-      return;
-    }
-
-    if (e.touches.length === 1 && viewportRef.current) {
-      const t = e.touches[0];
-      touchState.current = {
-        ...touchState.current,
-        mode: "drag",
-        startX: t.clientX,
-        startY: t.clientY,
-        originX: offset.x,
-        originY: offset.y,
-      };
-    }
-  };
-
-  React.useEffect(() => {
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => window.removeEventListener("mouseup", handleMouseUp);
-  });
-
-  return (
-    <div className="min-h-screen bg-cheese px-5 pt-6 pb-28 relative">
-      <div className="max-w-md mx-auto">
-        <div className="mb-5">
-          <h2 className="text-2xl font-bold text-[#7D5A5A]">时间轴</h2>
-          <p className="text-sm text-[#8B7470] mt-1">
-            把我们一路走来的重要时刻，慢慢串起来。
-          </p>
-        </div>
-
-        <div className="mb-5 rounded-[24px] border border-[#F7E3E7] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFF1F4] text-xl">
-                🗺️
-              </div>
-              <div>
-                <p className="text-sm text-[#8B7A84]">我们一起去过</p>
-                <h2 className="text-2xl font-semibold text-[#5E4B56]">
-                  {placesCount} 个地方
-                </h2>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={zoomOut}
-                className="h-9 w-9 rounded-full bg-[#FFF1F4] text-[#C97C8A] text-lg shadow-sm"
-              >
-                −
-              </button>
-              <button
-                onClick={resetView}
-                className="rounded-full bg-white border border-[#F3DADF] px-3 py-2 text-xs text-[#8B7A84] shadow-sm"
-              >
-                {Math.round(zoom * 100)}%
-              </button>
-              <button
-                onClick={zoomIn}
-                className="h-9 w-9 rounded-full bg-[#FFF1F4] text-[#C97C8A] text-lg shadow-sm"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {sortedItems.length === 0 ? (
-          <div className="rounded-[28px] border border-[#F5D6DC] bg-white/85 p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#FFF1F4] text-3xl">
-              📍
-            </div>
-            <h3 className="text-lg font-semibold text-[#5E4B56]">
-              时间轴还是空的
-            </h3>
-            <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[#8B7A84]">
-              去记下你们一起去过的地方，或者一个特别重要的日子吧。
-            </p>
-          </div>
-        ) : (
-          <div
-            ref={viewportRef}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onWheel={handleWheel}
-            onDoubleClick={resetView}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            className={`rounded-[28px] border border-[#F7E3E7] bg-[#FFFDFC] shadow-[0_10px_24px_rgba(0,0,0,0.05)] overflow-hidden relative select-none touch-none ${
-              dragging ? "cursor-grabbing" : "cursor-grab"
-            }`}
-            style={{ height: "70vh" }}
-          >
-            <div className="absolute right-3 top-3 z-20 rounded-full bg-white/90 px-3 py-1 text-[11px] text-[#8B7A84] shadow-sm">
-              拖动查看 · 双指/滚轮缩放 · 双击重置
-            </div>
-
-            <div
-              className="absolute left-0 top-0 origin-top-left"
-              style={{
-                width: baseWidth,
-                height: totalHeight,
-                transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-                transformOrigin: "0 0",
-              }}
-            >
-              <svg
-                width={baseWidth}
-                height={totalHeight}
-                viewBox={`0 0 ${baseWidth} ${totalHeight}`}
-                className="absolute inset-0"
-              >
-                <defs>
-                  <linearGradient id="timelinePathGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F5D3DB" />
-                    <stop offset="50%" stopColor="#EFB5C3" />
-                    <stop offset="100%" stopColor="#F5D3DB" />
-                  </linearGradient>
-                </defs>
-
-                <path
-                  d={buildPath()}
-                  fill="none"
-                  stroke="url(#timelinePathGradient)"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-
-                {points.map((point, index) => (
-                  <g key={`dot-${point.id}`}>
-                    <circle cx={point.x} cy={point.y} r="12" fill="#FFFDF2" />
-                    <circle
-                      cx={point.x}
-                      cy={point.y}
-                      r="7"
-                      fill={index % 2 === 0 ? "#EBA2B1" : "#DAB7FF"}
-                    />
-                  </g>
-                ))}
-              </svg>
-
-              <div className="absolute inset-0">
-                {points.map((item) => {
-                  const isLeft = item.side === "left";
-
-                  return (
-                    <div
-                      key={item.id}
-                      className="absolute"
-                      style={{
-                        top: item.y - 34,
-                        left: isLeft ? 16 : 218,
-                        width: 156,
-                      }}
-                    >
-                      <article className="rounded-[24px] border border-[#F7E3E7] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-                        <div className="mb-2 text-xs text-[#AA98A2]">
-                          {item.date}
-                        </div>
-
-                        <div className="mb-2 inline-block rounded-full bg-[#FFF1F4] px-3 py-1 text-xs text-[#C97C8A]">
-                          {item.place}
-                        </div>
-
-                        <h3 className="text-sm font-semibold text-[#5E4B56] leading-6">
-                          {item.title}
-                        </h3>
-
-                        <p className="mt-2 text-xs leading-6 text-[#7C6C76] whitespace-pre-wrap">
-                          {item.description}
-                        </p>
-
-                        <button
-                          onClick={() => onDelete(item.id)}
-                          className="mt-3 text-xs text-[#B07D78]"
-                        >
-                          删除
-                        </button>
-                      </article>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <JellyButton
-        onClick={onAdd}
-        className="fixed bottom-24 right-5 h-14 w-14 bg-primary text-white text-3xl font-bold flex items-center justify-center shadow-lg rounded-full"
-      >
-        +
-      </JellyButton>
-    </div>
-  );
-}
 
 function AddPage({ addMode, onSave, onBack }) {
   const [recordType, setRecordType] = useState("happy");
@@ -1105,7 +715,6 @@ export default function Page() {
   const [page, setPage] = useState("welcome");
 
   const [records, setRecords] = useState([]);
-  const [timelineItems, setTimelineItems] = useState([]);
 
   const [inviteCode, setInviteCode] = useState("");
   const [inputCode, setInputCode] = useState("");
@@ -1116,17 +725,19 @@ export default function Page() {
   const [addMode, setAddMode] = useState("record");
   const [returnPage, setReturnPage] = useState("records");
 
-  const [homeData, setHomeData] = useState({
-    togetherDate: "2025-04-15",
-    countdownTitle: "下一次见面",
-    countdownDate: "2026-03-20",
-    coverImage: "",
-    wishes: ["一起去看海", "一起做一顿饭"],
-  });
+const [homeData, setHomeData] = useState({
+  togetherDate: "2025-04-15",
+  coverImage: "",
+  countdowns: [
+    { title: "下一次见面", date: "2026-03-20" },
+    { title: "", date: "" },
+    { title: "", date: "" },
+  ],
+  wishes: ["一起去看海", "一起做一顿饭", ""],
+});
 
   useEffect(() => {
     const savedRecords = localStorage.getItem(RECORDS_KEY);
-    const savedTimeline = localStorage.getItem(TIMELINE_KEY);
     const savedInvite = localStorage.getItem(INVITE_KEY);
     const savedHome = localStorage.getItem(HOME_KEY);
 
@@ -1138,44 +749,43 @@ export default function Page() {
       }
     }
 
-    if (savedTimeline) {
-      try {
-        setTimelineItems(JSON.parse(savedTimeline));
-      } catch (e) {
-        console.error("Failed to parse timeline", e);
-      }
-    }
-
     if (savedInvite) setInviteCode(savedInvite);
 
-    if (savedHome) {
-      try {
-        const parsedHome = JSON.parse(savedHome);
-        setHomeData((prev) => ({
-          ...prev,
-          ...parsedHome,
-          countdownTitle:
-            parsedHome.countdownTitle || parsedHome.anniversaryDate
-              ? parsedHome.countdownTitle || "下一次见面"
-              : prev.countdownTitle,
-          countdownDate:
-            parsedHome.countdownDate ||
-            parsedHome.anniversaryDate ||
-            prev.countdownDate,
-        }));
-      } catch (e) {
-        console.error("Failed to parse home data", e);
-      }
-    }
+if (savedHome) {
+  try {
+    const parsedHome = JSON.parse(savedHome);
+
+    const migratedCountdowns = parsedHome.countdowns
+      ? parsedHome.countdowns
+      : [
+          {
+            title: parsedHome.countdownTitle || "下一次见面",
+            date: parsedHome.countdownDate || parsedHome.anniversaryDate || "",
+          },
+          { title: "", date: "" },
+          { title: "", date: "" },
+        ];
+
+    const migratedWishes = parsedHome.wishes
+      ? [...parsedHome.wishes, "", "", ""].slice(0, 3)
+      : ["", "", ""];
+
+    setHomeData((prev) => ({
+      ...prev,
+      ...parsedHome,
+      countdowns: migratedCountdowns,
+      wishes: migratedWishes,
+    }));
+  } catch (e) {
+    console.error("Failed to parse home data", e);
+  }
+}
   }, []);
 
   useEffect(() => {
     localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
   }, [records]);
 
-  useEffect(() => {
-    localStorage.setItem(TIMELINE_KEY, JSON.stringify(timelineItems));
-  }, [timelineItems]);
 
   useEffect(() => {
     localStorage.setItem(HOME_KEY, JSON.stringify(homeData));
@@ -1187,9 +797,6 @@ export default function Page() {
     return sorted.filter((item) => item.type === filter);
   }, [records, filter]);
 
-  const sortedTimeline = useMemo(() => {
-    return [...timelineItems].sort((a, b) => b.createdAt - a.createdAt);
-  }, [timelineItems]);
 
   const handleGenerateCode = () => {
     const code = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -1220,22 +827,15 @@ export default function Page() {
     setPage("home");
   };
 
-  const handleSave = (item) => {
-    if (addMode === "record") {
-      setRecords((prev) => [item, ...prev]);
-    } else {
-      setTimelineItems((prev) => [item, ...prev]);
-    }
-    setPage(returnPage);
-  };
+const handleSave = (item) => {
+  setRecords((prev) => [item, ...prev]);
+  setPage(returnPage);
+};
 
   const handleDeleteRecord = (id) => {
     setRecords((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleDeleteTimeline = (id) => {
-    setTimelineItems((prev) => prev.filter((item) => item.id !== id));
-  };
 
   if (page === "welcome") {
     return (
