@@ -544,7 +544,7 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
   });
 
   const touchState = React.useRef({
-    mode: null, // "drag" | "pinch"
+    mode: null,
     startX: 0,
     startY: 0,
     originX: 0,
@@ -568,7 +568,7 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
   const baseWidth = 390;
   const centerX = 195;
   const topPadding = 80;
-  const gapY = 230;
+  const gapY = 150;
   const curveAmp = 42;
   const totalHeight = Math.max(420, topPadding + sortedItems.length * gapY + 120);
 
@@ -591,11 +591,11 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
       const p1 = points[i];
       const p2 = points[i + 1];
       const midY = (p1.y + p2.y) / 2;
-      d += `C ${p1.x} ${midY - 40}, ${p2.x} ${midY + 40}, ${p2.x} ${p2.y} `;
+      d += `C ${p1.x} ${midY - 30}, ${p2.x} ${midY + 30}, ${p2.x} ${p2.y} `;
     }
 
     const last = points[points.length - 1];
-    d += `C ${last.x} ${last.y + 60}, ${centerX + 10} ${last.y + 90}, ${centerX} ${last.y + 120}`;
+    d += `C ${last.x} ${last.y + 50}, ${centerX + 10} ${last.y + 90}, ${centerX} ${last.y + 120}`;
     return d;
   };
 
@@ -611,8 +611,8 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
   const getTouchCenter = (touches, rect) => {
     const [t1, t2] = touches;
     return {
-      x: ((t1.clientX + t2.clientX) / 2) - rect.left,
-      y: ((t1.clientY + t2.clientY) / 2) - rect.top,
+      x: (t1.clientX + t2.clientX) / 2 - rect.left,
+      y: (t1.clientY + t2.clientY) / 2 - rect.top,
     };
   };
 
@@ -772,7 +772,7 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
         <div className="mb-5">
           <h2 className="text-2xl font-bold text-[#7D5A5A]">时间轴</h2>
           <p className="text-sm text-[#8B7470] mt-1">
-            把我们一路走来的重要时刻，慢慢串起来。
+            把我们一起走过的地方，慢慢串起来。
           </p>
         </div>
 
@@ -822,7 +822,7 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
               时间轴还是空的
             </h3>
             <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[#8B7A84]">
-              去记下你们一起去过的地方，或者一个特别重要的日子吧。
+              去记下你们一起去过的地方吧。
             </p>
           </div>
         ) : (
@@ -897,31 +897,23 @@ function TimelinePage({ timelineItems, onAdd, onDelete }) {
                       key={item.id}
                       className="absolute"
                       style={{
-                        top: item.y - 34,
-                        left: isLeft ? 16 : 218,
-                        width: 156,
+                        top: item.y - 24,
+                        left: isLeft ? 24 : 216,
+                        width: 150,
                       }}
                     >
-                      <article className="rounded-[24px] border border-[#F7E3E7] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
-                        <div className="mb-2 text-xs text-[#AA98A2]">
+                      <article className="rounded-[22px] border border-[#F7E3E7] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.05)]">
+                        <div className="text-[11px] text-[#AA98A2]">
                           {item.date}
                         </div>
 
-                        <div className="mb-2 inline-block rounded-full bg-[#FFF1F4] px-3 py-1 text-xs text-[#C97C8A]">
+                        <div className="mt-1 text-sm font-semibold text-[#5E4B56] leading-6">
                           {item.place}
                         </div>
 
-                        <h3 className="text-sm font-semibold text-[#5E4B56] leading-6">
-                          {item.title}
-                        </h3>
-
-                        <p className="mt-2 text-xs leading-6 text-[#7C6C76] whitespace-pre-wrap">
-                          {item.description}
-                        </p>
-
                         <button
                           onClick={() => onDelete(item.id)}
-                          className="mt-3 text-xs text-[#B07D78]"
+                          className="mt-2 text-[11px] text-[#B07D78]"
                         >
                           删除
                         </button>
@@ -950,10 +942,8 @@ function AddPage({ addMode, onSave, onBack }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const [timelineDate, setTimelineDate] = useState("");
-  const [timelinePlace, setTimelinePlace] = useState("");
-  const [timelineTitle, setTimelineTitle] = useState("");
-  const [timelineDescription, setTimelineDescription] = useState("");
+const [timelineDate, setTimelineDate] = useState("");
+const [timelinePlace, setTimelinePlace] = useState("");
 
   const remaining = 200 - content.length;
 
@@ -978,24 +968,22 @@ function AddPage({ addMode, onSave, onBack }) {
     });
   };
 
-  const submitTimeline = () => {
-    if (!timelinePlace.trim() || !timelineTitle.trim()) return;
+const submitTimeline = () => {
+  if (!timelinePlace.trim()) return;
 
-    onSave({
-      id: Date.now().toString(),
-      date:
-        timelineDate ||
-        new Date().toLocaleDateString("zh-CN", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
-      place: timelinePlace.trim(),
-      title: timelineTitle.trim(),
-      description: timelineDescription.trim(),
-      createdAt: Date.now(),
-    });
-  };
+  onSave({
+    id: Date.now().toString(),
+    date:
+      timelineDate ||
+      new Date().toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }),
+    place: timelinePlace.trim(),
+    createdAt: Date.now(),
+  });
+};
 
   return (
     <div className="min-h-screen bg-cheese px-5 py-8">
@@ -1011,66 +999,37 @@ function AddPage({ addMode, onSave, onBack }) {
         </div>
 
         {addMode === "record" ? (
-          <>
-            <div className="grid grid-cols-2 gap-3">
-              {recordOptions.map((item) => {
-                const active = recordType === item.key;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => setRecordType(item.key)}
-                    className={`rounded-3xl px-3 py-4 shadow-md transition-all active:scale-95 ${
-                      active
-                        ? "bg-primary text-white"
-                        : "bg-white text-[#7D5A5A]"
-                    }`}
-                  >
-                    <div className="text-2xl mb-2">{item.icon}</div>
-                    <div className="text-sm font-medium">{item.label}</div>
-                  </button>
-                );
-              })}
-            </div>
+       <>
+  <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
+    <div className="absolute -right-3 -top-3 rotate-12 rounded-full bg-[#FFD9A8] px-3 py-1 text-xs text-[#8C6A3C] shadow-sm">
+      place
+    </div>
+    <div className="absolute -left-3 top-14 -rotate-12 rounded-full bg-[#FAD1DC] px-3 py-1 text-xs text-[#B16478] shadow-sm">
+      memory
+    </div>
 
-            <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
-              <div className="absolute -right-3 -top-3 rotate-12 rounded-full bg-[#FFD9A8] px-3 py-1 text-xs text-[#8C6A3C] shadow-sm">
-                today
-              </div>
-              <div className="absolute -left-3 top-14 -rotate-12 rounded-full bg-[#FAD1DC] px-3 py-1 text-xs text-[#B16478] shadow-sm">
-                sweet note
-              </div>
+    <input
+      type="date"
+      value={timelineDate}
+      onChange={(e) => setTimelineDate(e.target.value)}
+      className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+    />
 
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="给这一刻起个小标题"
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-              />
+    <input
+      value={timelinePlace}
+      onChange={(e) => setTimelinePlace(e.target.value)}
+      placeholder="一起去过的地方"
+      className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+    />
+  </div>
 
-              <div className="rounded-3xl bg-[#FFFDFC] border border-[#F3DADF] p-4">
-                <textarea
-                  value={content}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 200) setContent(e.target.value);
-                  }}
-                  rows={7}
-                  placeholder="不需要写得完美，真实就好"
-                  className="w-full resize-none bg-transparent outline-none text-[15px] leading-7 text-[#5F514E] placeholder:text-[#B7A6A2]"
-                />
-
-                <div className="text-right text-xs text-[#A2908D] mt-2">
-                  {remaining}/200
-                </div>
-              </div>
-            </div>
-
-            <JellyButton
-              onClick={submitRecord}
-              className="w-full bg-primary py-4 text-white font-semibold text-lg"
-            >
-              存下这一刻
-            </JellyButton>
-          </>
+  <JellyButton
+    onClick={submitTimeline}
+    className="w-full bg-primary py-4 text-white font-semibold text-lg"
+  >
+    存进时间轴
+  </JellyButton>
+</>
         ) : (
           <>
             <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
