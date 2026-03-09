@@ -505,27 +505,26 @@ const filterTabs = [
           </p>
         </div>
 
-        <div className="mb-5 overflow-x-auto">
-          <div className="flex gap-2 pb-1 min-w-max">
-            {filterTabs.map((tab) => {
-              const active = filter === tab.key;
-              return (
-               <button
-  key={tab.key}
-  onClick={() => setFilter(tab.key)}
-  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition inline-flex items-center gap-1.5 ${
-    active
-      ? "bg-primary text-white"
-      : "bg-transparent text-[#8B7470]"
-  }`}
->
-  <span>{tab.icon}</span>
-  <span>{tab.label}</span>
-</button>
-              );
-            })}
-          </div>
-        </div>
+<div className="mb-5">
+  <div className="flex flex-wrap gap-2">
+    {filterTabs.map((tab) => {
+      const active = filter === tab.key;
+      return (
+        <button
+          key={tab.key}
+          onClick={() => setFilter(tab.key)}
+          className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition ${
+            active
+              ? "bg-primary text-white"
+              : "bg-transparent text-[#8B7470]"
+          }`}
+        >
+          {tab.label}
+        </button>
+      );
+    })}
+  </div>
+</div>
 
         <div className="space-y-5">
           {records.length === 0 ? (
