@@ -435,12 +435,12 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
         爱的沙漏⏳
       </h3>
       <p className="mt-1 text-[12px] text-[#9C8A93]">
-        把想见面的日子，一点点数给未来
+        把想见面的日子，告诉给未来
       </p>
     </div>
 
     <div className="rounded-full bg-[#FFDCE6] px-2.5 py-1 text-[12px] text-[#D97A8C] shadow-sm">
-      🎀
+      🧸
     </div>
   </div>
 
@@ -541,7 +541,7 @@ const filterTabs = [
         <div className="mb-4">
           <h2 className="text-xl font-bold text-[#7D5A5A]">MOMENT</h2>
           <p className="text-[13px] text-[#8B7470] mt-1">
-            把那些值得珍藏的时刻，安放在这里。
+            把那些值得珍藏的时刻，安放在这里。😌
           </p>
         </div>
 
@@ -575,7 +575,7 @@ const filterTabs = [
                 这里还没有记录
               </h3>
               <p className="mx-auto mt-2 max-w-xs text-[13px] leading-6 text-[#8B7A84]">
-                写下今天的开心、难过，或者一个很平淡的小瞬间吧。
+                写下今天的开心、难过，或者一个平淡的小瞬间吧～
               </p>
             </div>
           ) : (
