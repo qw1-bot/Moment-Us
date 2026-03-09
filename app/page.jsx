@@ -477,12 +477,12 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
   </div>
 </div>
 
-     <div className="relative overflow-hidden rounded-[26px] border border-[#F7E9D9] bg-[#FFFDF8] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.05)]">
+ <div className="relative overflow-hidden rounded-[26px] border border-[#EEE5FA] bg-[#FAF7FF] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.05)]">
   <div
     className="pointer-events-none absolute inset-0 opacity-35"
     style={{
       backgroundImage:
-        "radial-gradient(circle at 12px 12px, rgba(255,203,148,0.18) 1.2px, transparent 1.2px)",
+        "radial-gradient(circle at 12px 12px, rgba(205,182,255,0.18) 1.2px, transparent 1.2px)",
       backgroundSize: "22px 22px",
     }}
   />
