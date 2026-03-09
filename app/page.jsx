@@ -421,7 +421,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
 
         <div className="rounded-[24px] border border-[#F7E3E7] bg-white px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
           <h3 className="text-[15px] font-semibold text-[#5E4B56]">
-            倒计时
+            爱的沙漏⏳
           </h3>
 
           <div className="mt-3 space-y-1">
@@ -459,7 +459,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
 
         <div className="rounded-[24px] border border-[#F7E3E7] bg-white px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
           <h3 className="text-[15px] font-semibold text-[#5E4B56]">
-            愿望清单
+            愿望清单💗
           </h3>
 
           <div className="mt-3 space-y-1">
