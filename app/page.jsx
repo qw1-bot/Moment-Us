@@ -435,7 +435,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
         爱的沙漏⏳
       </h3>
       <p className="mt-1 text-[12px] text-[#9C8A93]">
-        把想见面的日子，告诉给未来
+        把想见面的日子，告诉未来
       </p>
     </div>
 
@@ -545,8 +545,8 @@ const filterTabs = [
           </p>
         </div>
 
-<div className="mb-5 md:overflow-x-auto">
-  <div className="flex flex-wrap gap-2 md:flex-nowrap md:pb-1 md:min-w-max">
+<div className="mb-5">
+  <div className="flex flex-wrap gap-2">
     {filterTabs.map((tab) => {
       const active = filter === tab.key;
       return (
