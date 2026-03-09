@@ -335,7 +335,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
                   记录那些值得被珍藏的小事～📝
                 </p>
                 <h1 className="mt-3 text-4xl font-bold tracking-tight">
-                  我们相爱的第 {daysTogether || 0} 天🥰
+                  相爱的第 {daysTogether || 0} 天🥰
                 </h1>
                 <p className="mt-2 text-sm text-white/85">
                   每天都在慢慢积攒属于我们的回忆🧩
@@ -541,7 +541,7 @@ const filterTabs = [
         <div className="mb-4">
           <h2 className="text-xl font-bold text-[#7D5A5A]">MOMENT</h2>
           <p className="text-[13px] text-[#8B7470] mt-1">
-            把那些值得珍藏的时刻，安放在这里。😌
+            把那些值得珍藏的时刻，安放在这里。
           </p>
         </div>
 
