@@ -137,7 +137,7 @@ function WelcomePage({ onStart, onInvite }) {
             <p className="text-base leading-7 text-[#6B5B57] px-2">
               一个只属于你们的空间，
               <br />
-              用来记录那些值得被记住的瞬间✨💗
+              用来记录那些值得被记住的时刻✨💗
             </p>
           </div>
         </div>
@@ -198,7 +198,7 @@ function PairPage({
           <div>
             <h3 className="text-lg font-semibold text-[#7D5A5A]">生成邀请码</h3>
             <p className="text-sm text-[#8B7470] mt-1">
-              把邀请码分享给对方，一起进入同一个空间。
+              把邀请码分享给对方，进入你们的共同空间。
             </p>
           </div>
 
@@ -218,7 +218,7 @@ function PairPage({
           <div>
             <h3 className="text-lg font-semibold text-[#7D5A5A]">输入邀请码</h3>
             <p className="text-sm text-[#8B7470] mt-1">
-              输入后，就能进入你们的共同空间。
+              输入后，就能进入你们的共同空间啦～
             </p>
           </div>
 
@@ -332,13 +332,13 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
 
               <div>
                 <p className="text-sm text-white/90">
-                  记录那些值得被珍藏的小事～
+                  记录那些值得被珍藏的小事～📝
                 </p>
                 <h1 className="mt-3 text-4xl font-bold tracking-tight">
-                  在一起的第 {daysTogether || 0} 天
+                  我们相爱的第 {daysTogether || 0} 天🥰
                 </h1>
                 <p className="mt-2 text-sm text-white/85">
-                  每天都在慢慢积攒属于我们的回忆
+                  每天都在慢慢积攒属于我们的回忆🧩
                 </p>
               </div>
             </div>
@@ -378,7 +378,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm text-[#7B6A75]">倒计时（最多 3 个）</label>
+              <label className="text-sm text-[#7B6A75]">爱的沙漏⏳（最多 3 个）</label>
 
               {[0, 1, 2].map((index) => (
                 <div key={index} className="grid grid-cols-1 gap-3">
@@ -404,7 +404,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm text-[#7B6A75]">愿望清单（最多 3 个）</label>
+              <label className="text-sm text-[#7B6A75]">愿望清单💗（最多 3 个）</label>
 
               {[0, 1, 2].map((index) => (
                 <input
@@ -499,9 +499,9 @@ const filterTabs = [
     <div className="min-h-screen bg-cheese px-5 pt-6 pb-28 relative">
       <div className="max-w-xl mx-auto">
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-[#7D5A5A]">记录</h2>
+          <h2 className="text-xl font-bold text-[#7D5A5A]">MOMENT</h2>
           <p className="text-[13px] text-[#8B7470] mt-1">
-            把那些值得珍藏的回忆，记录下来。
+            把那些值得珍藏的时刻，安放在这里。
           </p>
         </div>
 
@@ -730,11 +730,11 @@ const [homeData, setHomeData] = useState({
   togetherDate: "2025-04-15",
   coverImage: "",
   countdowns: [
-    { title: "下一次见面", date: "2026-03-20" },
-    { title: "", date: "" },
-    { title: "", date: "" },
+    { title: "下一次见面🥰", date: "2026-03-20" },
+    { title: "意大利之旅✈️", date: "2026-06-20" },
+    { title: "Coldplay演唱会🎵", date: "2027-04-20" },
   ],
-  wishes: ["一起去看海", "一起做一顿饭", ""],
+  wishes: ["一起去意大利🇮🇹", "一起做一顿饭😋", "一起去看一场NBA🏀"],
 });
 
   useEffect(() => {
