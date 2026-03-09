@@ -484,16 +484,16 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
   );
 }
 function RecordsPage({ records, filter, setFilter, onDelete, onAdd }) {
-  const filterTabs = [
-    { key: "all", label: "全部" },
-    { key: "happy", label: "开心" },
-    { key: "touched", label: "感动" },
-    { key: "miss", label: "想念" },
-    { key: "calm", label: "平和" },
-    { key: "sad", label: "难过" },
-    { key: "disappointed", label: "失望" },
-    { key: "angry", label: "生气" },
-  ];
+const filterTabs = [
+  { key: "all", label: "全部", icon: "🗂️" },
+  { key: "happy", label: "开心", icon: "😄" },
+  { key: "touched", label: "感动", icon: "🥹" },
+  { key: "miss", label: "想念", icon: "💭" },
+  { key: "calm", label: "平和", icon: "🌿" },
+  { key: "sad", label: "难过", icon: "😔" },
+  { key: "disappointed", label: "失望", icon: "🥀" },
+  { key: "angry", label: "生气", icon: "😤" },
+];
 
   return (
     <div className="min-h-screen bg-cheese px-5 pt-6 pb-28 relative">
@@ -510,17 +510,18 @@ function RecordsPage({ records, filter, setFilter, onDelete, onAdd }) {
             {filterTabs.map((tab) => {
               const active = filter === tab.key;
               return (
-                <button
-                  key={tab.key}
-                  onClick={() => setFilter(tab.key)}
-                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition ${
-                    active
-                      ? "bg-primary text-white"
-                      : "bg-transparent text-[#8B7470]"
-                  }`}
-                >
-                  {tab.label}
-                </button>
+               <button
+  key={tab.key}
+  onClick={() => setFilter(tab.key)}
+  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition inline-flex items-center gap-1.5 ${
+    active
+      ? "bg-primary text-white"
+      : "bg-transparent text-[#8B7470]"
+  }`}
+>
+  <span>{tab.icon}</span>
+  <span>{tab.label}</span>
+</button>
               );
             })}
           </div>
