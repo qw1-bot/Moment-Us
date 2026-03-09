@@ -950,10 +950,8 @@ function AddPage({ addMode, onSave, onBack }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-const [timelineDate, setTimelineDate] = useState("");
-const [timelinePlace, setTimelinePlace] = useState("");
-const [timelineTitle, setTimelineTitle] = useState("");
-const [timelineDescription, setTimelineDescription] = useState("");
+  const [timelineDate, setTimelineDate] = useState("");
+  const [timelinePlace, setTimelinePlace] = useState("");
 
   const remaining = 200 - content.length;
 
@@ -978,24 +976,22 @@ const [timelineDescription, setTimelineDescription] = useState("");
     });
   };
 
-const submitTimeline = () => {
-  if (!timelinePlace.trim() || !timelineTitle.trim()) return;
+  const submitTimeline = () => {
+    if (!timelinePlace.trim()) return;
 
-  onSave({
-    id: Date.now().toString(),
-    date:
-      timelineDate ||
-      new Date().toLocaleDateString("zh-CN", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }),
-    place: timelinePlace.trim(),
-    title: timelineTitle.trim(),
-    description: timelineDescription.trim(),
-    createdAt: Date.now(),
-  });
-};
+    onSave({
+      id: Date.now().toString(),
+      date:
+        timelineDate ||
+        new Date().toLocaleDateString("zh-CN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
+      place: timelinePlace.trim(),
+      createdAt: Date.now(),
+    });
+  };
 
   return (
     <div className="min-h-screen bg-cheese px-5 py-8">
@@ -1011,52 +1007,66 @@ const submitTimeline = () => {
         </div>
 
         {addMode === "record" ? (
-<>
-  <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
-    <div className="absolute -right-3 -top-3 rotate-12 rounded-full bg-[#FFD9A8] px-3 py-1 text-xs text-[#8C6A3C] shadow-sm">
-      place
-    </div>
-    <div className="absolute -left-3 top-14 -rotate-12 rounded-full bg-[#FAD1DC] px-3 py-1 text-xs text-[#B16478] shadow-sm">
-      memory
-    </div>
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              {recordOptions.map((item) => {
+                const active = recordType === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => setRecordType(item.key)}
+                    className={`rounded-3xl px-3 py-4 shadow-md transition-all active:scale-95 ${
+                      active
+                        ? "bg-primary text-white"
+                        : "bg-white text-[#7D5A5A]"
+                    }`}
+                  >
+                    <div className="text-2xl mb-2">{item.icon}</div>
+                    <div className="text-sm font-medium">{item.label}</div>
+                  </button>
+                );
+              })}
+            </div>
 
-    <input
-      type="date"
-      value={timelineDate}
-      onChange={(e) => setTimelineDate(e.target.value)}
-      className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-    />
+            <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
+              <div className="absolute -right-3 -top-3 rotate-12 rounded-full bg-[#FFD9A8] px-3 py-1 text-xs text-[#8C6A3C] shadow-sm">
+                today
+              </div>
+              <div className="absolute -left-3 top-14 -rotate-12 rounded-full bg-[#FAD1DC] px-3 py-1 text-xs text-[#B16478] shadow-sm">
+                sweet note
+              </div>
 
-    <input
-      value={timelinePlace}
-      onChange={(e) => setTimelinePlace(e.target.value)}
-      placeholder="一起去过的地方"
-      className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-    />
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="给这一刻起个小标题"
+                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+              />
 
-    <input
-      value={timelineTitle}
-      onChange={(e) => setTimelineTitle(e.target.value)}
-      placeholder="给这一天起个名字"
-      className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-    />
+              <div className="rounded-3xl bg-[#FFFDFC] border border-[#F3DADF] p-4">
+                <textarea
+                  value={content}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 200) setContent(e.target.value);
+                  }}
+                  rows={7}
+                  placeholder="写下这一刻的幸福或难过"
+                  className="w-full resize-none bg-transparent outline-none text-[15px] leading-7 text-[#5F514E] placeholder:text-[#B7A6A2]"
+                />
 
-    <textarea
-      value={timelineDescription}
-      onChange={(e) => setTimelineDescription(e.target.value)}
-      rows={5}
-      placeholder="写下这一天发生了什么"
-      className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none resize-none text-[15px] leading-7 text-[#5F514E]"
-    />
-  </div>
+                <div className="text-right text-xs text-[#A2908D] mt-2">
+                  {remaining}/200
+                </div>
+              </div>
+            </div>
 
-  <JellyButton
-    onClick={submitTimeline}
-    className="w-full bg-primary py-4 text-white font-semibold text-lg"
-  >
-    存进时间轴
-  </JellyButton>
-</>
+            <JellyButton
+              onClick={submitRecord}
+              className="w-full bg-primary py-4 text-white font-semibold text-lg"
+            >
+              存下这一刻
+            </JellyButton>
+          </>
         ) : (
           <>
             <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
@@ -1080,21 +1090,6 @@ const submitTimeline = () => {
                 placeholder="一起去过的地方"
                 className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
               />
-
-              <input
-                value={timelineTitle}
-                onChange={(e) => setTimelineTitle(e.target.value)}
-                placeholder="给这一天起个名字"
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
-              />
-
-              <textarea
-                value={timelineDescription}
-                onChange={(e) => setTimelineDescription(e.target.value)}
-                rows={5}
-                placeholder="写下这一天发生了什么"
-                className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none resize-none text-[15px] leading-7 text-[#5F514E]"
-              />
             </div>
 
             <JellyButton
@@ -1109,7 +1104,6 @@ const submitTimeline = () => {
     </div>
   );
 }
-
 export default function Page() {
   const [page, setPage] = useState("welcome");
 
