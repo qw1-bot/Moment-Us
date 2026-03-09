@@ -545,8 +545,8 @@ const filterTabs = [
           </p>
         </div>
 
-<div className="mb-5 overflow-x-auto">
-  <div className="flex gap-2 pb-1 min-w-max">
+<div className="mb-5 md:overflow-x-auto">
+  <div className="flex flex-wrap gap-2 md:flex-nowrap md:pb-1 md:min-w-max">
     {filterTabs.map((tab) => {
       const active = filter === tab.key;
       return (
