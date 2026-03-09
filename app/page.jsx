@@ -259,19 +259,46 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
 
   const previewWishes = (homeData.wishes || []).slice(0, 3).filter(Boolean);
 
-  const handleUploadImage = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+ const handleUploadImage = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
+  if (file.size > 2 * 1024 * 1024) {
+    alert("图片太大了，请选择 2MB 以内的图片。");
+    return;
+  }
+
+  const img = new Image();
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+
+      const maxWidth = 1000;
+      const scale = Math.min(1, maxWidth / img.width);
+
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.6);
+
       setHomeData((prev) => ({
         ...prev,
-        coverImage: reader.result,
+        coverImage: compressedDataUrl,
       }));
     };
-    reader.readAsDataURL(file);
+
+    img.src = reader.result;
   };
+
+  reader.readAsDataURL(file);
+};
 
   const updateCountdown = (index, field, value) => {
     setHomeData((prev) => {
