@@ -275,7 +275,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
       <div className="max-w-md mx-auto space-y-5">
         <div className="flex items-center justify-between">
           <button onClick={onGoPair} className="text-sm text-[#8B7470]">
-            邀请
+            邀请TA
           </button>
           <button
             onClick={() => setEditing((prev) => !prev)}
@@ -305,10 +305,10 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
                   记录那些值得被珍藏的小事～
                 </p>
                 <h1 className="mt-3 text-4xl font-bold tracking-tight">
-                  在一起第 {daysTogether || 0} 天
+                  在一起的第 {daysTogether || 0} 天
                 </h1>
                 <p className="mt-2 text-sm text-white/85">
-                  每一天都在慢慢积攒属于我们的回忆
+                  每天都在慢慢积攒属于我们的回忆
                 </p>
               </div>
             </div>
@@ -391,7 +391,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
                       .filter(Boolean),
                   }))
                 }
-                placeholder={"一起去看海\n一起做一顿饭"}
+                placeholder={"一起去意大利🇮🇹\n一起去看一场NBA"}
                 className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none resize-none text-[15px] leading-7 text-[#5F514E]"
               />
             </div>
@@ -404,7 +404,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
               ⏳
             </div>
             <div>
-              <p className="text-sm text-[#8B7A84]">下一次期待</p>
+              <p className="text-sm text-[#8B7A84]">倒计时</p>
               <h3 className="text-base font-semibold text-[#5E4B56] mt-1">
                 {homeData.countdownTitle || "下一次见面"}
               </h3>
@@ -425,7 +425,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-[#5E4B56]">
-                想一起完成的小事
+                愿望清单
               </h3>
               <p className="mt-1 text-sm text-[#8B7A84]">
                 把未来的小期待，也轻轻放进这里
@@ -440,7 +440,7 @@ function HomePage({ homeData, setHomeData, onGoPair }) {
             <div className="rounded-3xl bg-[#FFF8FA] px-4 py-5 text-sm text-[#8B7A84] text-center leading-6">
               这里还没有愿望清单。
               <br />
-              先写下一件你们想一起完成的小事吧。
+              写下一件你们想一起完成的小事吧。
             </div>
           ) : (
             <div className="space-y-3">
@@ -478,7 +478,7 @@ function RecordsPage({ records, filter, setFilter, onDelete, onAdd }) {
         <div className="mb-4">
           <h2 className="text-xl font-bold text-[#7D5A5A]">记录</h2>
           <p className="text-[13px] text-[#8B7470] mt-1">
-            把那些值得留下来的情绪，轻轻写下来。
+            把那些值得珍藏的回忆，记录下来。
           </p>
         </div>
 
