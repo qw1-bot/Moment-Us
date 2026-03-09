@@ -952,6 +952,8 @@ function AddPage({ addMode, onSave, onBack }) {
 
 const [timelineDate, setTimelineDate] = useState("");
 const [timelinePlace, setTimelinePlace] = useState("");
+const [timelineTitle, setTimelineTitle] = useState("");
+const [timelineDescription, setTimelineDescription] = useState("");
 
   const remaining = 200 - content.length;
 
@@ -977,7 +979,7 @@ const [timelinePlace, setTimelinePlace] = useState("");
   };
 
 const submitTimeline = () => {
-  if (!timelinePlace.trim()) return;
+  if (!timelinePlace.trim() || !timelineTitle.trim()) return;
 
   onSave({
     id: Date.now().toString(),
@@ -989,6 +991,8 @@ const submitTimeline = () => {
         day: "2-digit",
       }),
     place: timelinePlace.trim(),
+    title: timelineTitle.trim(),
+    description: timelineDescription.trim(),
     createdAt: Date.now(),
   });
 };
@@ -1007,7 +1011,7 @@ const submitTimeline = () => {
         </div>
 
         {addMode === "record" ? (
-       <>
+<>
   <div className="rounded-[30px] border-2 border-dashed border-[#F2C9D2] bg-white p-4 shadow-md space-y-4 relative">
     <div className="absolute -right-3 -top-3 rotate-12 rounded-full bg-[#FFD9A8] px-3 py-1 text-xs text-[#8C6A3C] shadow-sm">
       place
@@ -1028,6 +1032,21 @@ const submitTimeline = () => {
       onChange={(e) => setTimelinePlace(e.target.value)}
       placeholder="一起去过的地方"
       className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+    />
+
+    <input
+      value={timelineTitle}
+      onChange={(e) => setTimelineTitle(e.target.value)}
+      placeholder="给这一天起个名字"
+      className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none"
+    />
+
+    <textarea
+      value={timelineDescription}
+      onChange={(e) => setTimelineDescription(e.target.value)}
+      rows={5}
+      placeholder="写下这一天发生了什么"
+      className="w-full rounded-3xl border border-[#F3DADF] bg-[#FFFDFC] px-4 py-3 outline-none resize-none text-[15px] leading-7 text-[#5F514E]"
     />
   </div>
 
