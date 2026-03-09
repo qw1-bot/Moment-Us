@@ -535,7 +535,7 @@ const filterTabs = [
                 这里还没有记录
               </h3>
               <p className="mx-auto mt-2 max-w-xs text-[13px] leading-6 text-[#8B7A84]">
-                写下今天的开心、难过，或者一个很安静的小瞬间吧。
+                写下今天的开心、难过，或者一个很平淡的小瞬间吧。
               </p>
             </div>
           ) : (
